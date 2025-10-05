@@ -262,16 +262,16 @@ curl --unix-socket /tmp/docker-proxy.sock http://localhost/v1.41/containers/json
 ```mermaid
 graph LR
     subgraph "CI/CD Runner"
-        A[Pipeline Step\n(docker build/push)]
+        A[Pipeline Step<br/>(docker build/push)]
     end
 
     subgraph "Proxy Host"
-        B[Docker Proxy\nLISTEN_SOCKET=/tmp/docker-proxy.sock]
-        C[(Unix Socket\n/tmp/docker-proxy.sock)]
+        B[Docker Proxy<br/>LISTEN_SOCKET=/tmp/docker-proxy.sock]
+        C[(Unix Socket<br/>/tmp/docker-proxy.sock)]
     end
 
     subgraph "Docker Host"
-        D[(Docker Socket\n/var/run/docker.sock)]
+        D[(Docker Socket<br/>/var/run/docker.sock)]
         E[Docker Engine]
     end
 
