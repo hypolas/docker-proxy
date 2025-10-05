@@ -59,13 +59,31 @@ func NewHandler(cfg *config.Config) *Handler {
 
 // ProxyRequest proxies the request to Docker socket
 func (h *Handler) ProxyRequest(c *gin.Context) {
-	// Build the target URL
+	targetPath := buildTargetPath(c)
+	req := h.prepareRequest(c)
+	if req == nil {
+		return // Error already handled
+	}
+
+	resp, err := h.executeRequest(req, targetPath, c)
+	if err != nil {
+		return // Error already handled
+	}
+
+	h.sendResponse(c, resp)
+}
+
+// buildTargetPath constructs the target path with query parameters
+func buildTargetPath(c *gin.Context) string {
 	targetPath := c.Request.URL.Path
 	if c.Request.URL.RawQuery != "" {
 		targetPath += "?" + c.Request.URL.RawQuery
 	}
+	return targetPath
+}
 
-	// Create resty request
+// prepareRequest creates and configures a resty request
+func (h *Handler) prepareRequest(c *gin.Context) *resty.Request {
 	req := h.client.R()
 
 	// Copy headers
@@ -75,19 +93,23 @@ func (h *Handler) ProxyRequest(c *gin.Context) {
 		}
 	}
 
-	// Copy body for POST, PUT, PATCH
+	// Copy body if present
 	if c.Request.Body != nil {
 		body, err := io.ReadAll(c.Request.Body)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "failed to read request body",
 			})
-			return
+			return nil
 		}
 		req.SetBody(body)
 	}
 
-	// Execute request based on method
+	return req
+}
+
+// executeRequest executes the HTTP request using the appropriate method
+func (h *Handler) executeRequest(req *resty.Request, targetPath string, c *gin.Context) (*resty.Response, error) {
 	var resp *resty.Response
 	var err error
 
@@ -110,16 +132,21 @@ func (h *Handler) ProxyRequest(c *gin.Context) {
 		c.JSON(http.StatusMethodNotAllowed, gin.H{
 			"error": fmt.Sprintf("method %s not allowed", c.Request.Method),
 		})
-		return
+		return nil, fmt.Errorf("method not allowed")
 	}
 
 	if err != nil {
 		c.JSON(http.StatusBadGateway, gin.H{
 			"error": fmt.Sprintf("failed to proxy request: %v", err),
 		})
-		return
+		return nil, err
 	}
 
+	return resp, nil
+}
+
+// sendResponse sends the proxied response back to the client
+func (h *Handler) sendResponse(c *gin.Context, resp *resty.Response) {
 	// Copy response headers
 	for key, values := range resp.Header() {
 		for _, value := range values {

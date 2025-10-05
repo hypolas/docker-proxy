@@ -567,8 +567,8 @@ func TestCheckImageOperation(t *testing.T) {
 
 func TestParseImageName(t *testing.T) {
 	tests := []struct {
-		name        string
-		imageName   string
+		name         string
+		imageName    string
 		expectedRepo string
 		expectedTag  string
 	}{

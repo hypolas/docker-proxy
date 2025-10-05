@@ -59,64 +59,15 @@ func main() {
 
 	// Create HTTP server
 	srv := &http.Server{
-		Handler: router,
+		Handler:           router,
+		ReadHeaderTimeout: 30 * time.Second, // Prevent Slowloris attacks
+		ReadTimeout:       60 * time.Second,
+		WriteTimeout:      60 * time.Second,
+		IdleTimeout:       120 * time.Second,
 	}
 
 	// Start server (Unix socket or TCP)
-	go func() {
-		if cfg.ListenSocket != "" {
-			// Unix socket mode
-			// Strip "unix://" prefix if present
-			socketPath := cfg.ListenSocket
-			if len(socketPath) > 7 && socketPath[:7] == "unix://" {
-				socketPath = socketPath[7:]
-			}
-
-			logger.Infof("Listening on Unix socket: %s", socketPath)
-			logger.Infof("Proxying to %s", cfg.DockerSocket)
-
-			// Remove existing socket file if it exists
-			os.Remove(socketPath)
-
-			listener, err := net.Listen("unix", socketPath)
-			if err != nil {
-				logger.Fatalf("Failed to create Unix socket: %v", err)
-			}
-
-			// Set socket permissions (0666 for wider access, or use SOCKET_PERMS env var)
-			socketPerms := os.Getenv("SOCKET_PERMS")
-			if socketPerms == "" {
-				socketPerms = "0666" // Default: accessible by all users
-			}
-
-			// Parse octal permission string
-			perms := os.FileMode(0666) // default
-			if permValue, err := strconv.ParseUint(socketPerms, 8, 32); err != nil {
-				logger.Warnf("Invalid SOCKET_PERMS '%s', using 0666", socketPerms)
-			} else {
-				perms = os.FileMode(permValue)
-			}
-
-			if err := os.Chmod(socketPath, perms); err != nil {
-				logger.Warnf("Failed to set socket permissions: %v", err)
-			} else {
-				logger.Infof("Socket permissions set to %s", socketPerms)
-			}
-
-			if err := srv.Serve(listener); err != nil && err != http.ErrServerClosed {
-				logger.Fatalf("Failed to start server: %v", err)
-			}
-		} else {
-			// TCP mode
-			logger.Infof("Listening on %s", cfg.ListenAddr)
-			logger.Infof("Proxying to %s", cfg.DockerSocket)
-
-			srv.Addr = cfg.ListenAddr
-			if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-				logger.Fatalf("Failed to start server: %v", err)
-			}
-		}
-	}()
+	go startServer(srv, cfg, logger)
 
 	// Wait for interrupt signal
 	quit := make(chan os.Signal, 1)
@@ -135,14 +86,83 @@ func main() {
 
 	// Cleanup Unix socket if used
 	if cfg.ListenSocket != "" {
-		socketPath := cfg.ListenSocket
-		if len(socketPath) > 7 && socketPath[:7] == "unix://" {
-			socketPath = socketPath[7:]
-		}
-		os.Remove(socketPath)
+		os.Remove(stripUnixPrefix(cfg.ListenSocket))
 	}
 
 	logger.Info("Server stopped")
+}
+
+// startServer starts the HTTP server on either Unix socket or TCP
+func startServer(srv *http.Server, cfg *config.Config, logger *logrus.Logger) {
+	if cfg.ListenSocket != "" {
+		startUnixSocketServer(srv, cfg, logger)
+	} else {
+		startTCPServer(srv, cfg, logger)
+	}
+}
+
+// startUnixSocketServer starts the server on a Unix socket
+func startUnixSocketServer(srv *http.Server, cfg *config.Config, logger *logrus.Logger) {
+	socketPath := stripUnixPrefix(cfg.ListenSocket)
+
+	logger.Infof("Listening on Unix socket: %s", socketPath)
+	logger.Infof("Proxying to %s", cfg.DockerSocket)
+
+	// Remove existing socket file if it exists
+	os.Remove(socketPath)
+
+	listener, err := net.Listen("unix", socketPath)
+	if err != nil {
+		logger.Fatalf("Failed to create Unix socket: %v", err)
+	}
+
+	// Set socket permissions
+	setSocketPermissions(socketPath, logger)
+
+	if err := srv.Serve(listener); err != nil && err != http.ErrServerClosed {
+		logger.Fatalf("Failed to start server: %v", err)
+	}
+}
+
+// startTCPServer starts the server on a TCP address
+func startTCPServer(srv *http.Server, cfg *config.Config, logger *logrus.Logger) {
+	logger.Infof("Listening on %s", cfg.ListenAddr)
+	logger.Infof("Proxying to %s", cfg.DockerSocket)
+
+	srv.Addr = cfg.ListenAddr
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		logger.Fatalf("Failed to start server: %v", err)
+	}
+}
+
+// setSocketPermissions sets permissions on a Unix socket
+func setSocketPermissions(socketPath string, logger *logrus.Logger) {
+	socketPerms := os.Getenv("SOCKET_PERMS")
+	if socketPerms == "" {
+		socketPerms = "0666" // Default: accessible by all users
+	}
+
+	// Parse octal permission string
+	perms := os.FileMode(0666) // default
+	if permValue, err := strconv.ParseUint(socketPerms, 8, 32); err != nil {
+		logger.Warnf("Invalid SOCKET_PERMS '%s', using 0666", socketPerms)
+	} else {
+		perms = os.FileMode(permValue)
+	}
+
+	if err := os.Chmod(socketPath, perms); err != nil {
+		logger.Warnf("Failed to set socket permissions: %v", err)
+	} else {
+		logger.Infof("Socket permissions set to %s", socketPerms)
+	}
+}
+
+// stripUnixPrefix removes "unix://" prefix from socket path
+func stripUnixPrefix(socketPath string) string {
+	if len(socketPath) > 7 && socketPath[:7] == "unix://" {
+		return socketPath[7:]
+	}
+	return socketPath
 }
 
 // setupLogger configures the logger based on log level
@@ -169,81 +189,55 @@ func setupLogger(level string) *logrus.Logger {
 // logConfiguration logs the current access rules configuration
 func logConfiguration(logger *logrus.Logger, cfg *config.Config) {
 	logger.Info("Access Rules Configuration:")
+	logger.Infof("  Granted endpoints: %v", getGrantedEndpoints(*cfg.AccessRules))
+	logger.Infof("  Allowed methods: %v", getAllowedMethods(*cfg.AccessRules))
 
-	rules := cfg.AccessRules
+	if !cfg.AccessRules.Post && !cfg.AccessRules.Delete && !cfg.AccessRules.Put {
+		logger.Warn("  ⚠️  Read-only mode enabled (POST, DELETE, PUT disabled)")
+	}
+}
 
-	// Log granted endpoints
+// getGrantedEndpoints returns a list of enabled endpoints
+func getGrantedEndpoints(rules config.AccessRules) []string {
+	endpoints := []struct {
+		enabled bool
+		name    string
+	}{
+		{rules.Events, "EVENTS"},
+		{rules.Ping, "PING"},
+		{rules.Version, "VERSION"},
+		{rules.Auth, "AUTH"},
+		{rules.Build, "BUILD"},
+		{rules.Commit, "COMMIT"},
+		{rules.Configs, "CONFIGS"},
+		{rules.Containers, "CONTAINERS"},
+		{rules.Distribution, "DISTRIBUTION"},
+		{rules.Exec, "EXEC"},
+		{rules.Images, "IMAGES"},
+		{rules.Info, "INFO"},
+		{rules.Networks, "NETWORKS"},
+		{rules.Nodes, "NODES"},
+		{rules.Plugins, "PLUGINS"},
+		{rules.Secrets, "SECRETS"},
+		{rules.Services, "SERVICES"},
+		{rules.Session, "SESSION"},
+		{rules.Swarm, "SWARM"},
+		{rules.System, "SYSTEM"},
+		{rules.Tasks, "TASKS"},
+		{rules.Volumes, "VOLUMES"},
+	}
+
 	granted := []string{}
-	if rules.Events {
-		granted = append(granted, "EVENTS")
+	for _, ep := range endpoints {
+		if ep.enabled {
+			granted = append(granted, ep.name)
+		}
 	}
-	if rules.Ping {
-		granted = append(granted, "PING")
-	}
-	if rules.Version {
-		granted = append(granted, "VERSION")
-	}
-	if rules.Auth {
-		granted = append(granted, "AUTH")
-	}
-	if rules.Build {
-		granted = append(granted, "BUILD")
-	}
-	if rules.Commit {
-		granted = append(granted, "COMMIT")
-	}
-	if rules.Configs {
-		granted = append(granted, "CONFIGS")
-	}
-	if rules.Containers {
-		granted = append(granted, "CONTAINERS")
-	}
-	if rules.Distribution {
-		granted = append(granted, "DISTRIBUTION")
-	}
-	if rules.Exec {
-		granted = append(granted, "EXEC")
-	}
-	if rules.Images {
-		granted = append(granted, "IMAGES")
-	}
-	if rules.Info {
-		granted = append(granted, "INFO")
-	}
-	if rules.Networks {
-		granted = append(granted, "NETWORKS")
-	}
-	if rules.Nodes {
-		granted = append(granted, "NODES")
-	}
-	if rules.Plugins {
-		granted = append(granted, "PLUGINS")
-	}
-	if rules.Secrets {
-		granted = append(granted, "SECRETS")
-	}
-	if rules.Services {
-		granted = append(granted, "SERVICES")
-	}
-	if rules.Session {
-		granted = append(granted, "SESSION")
-	}
-	if rules.Swarm {
-		granted = append(granted, "SWARM")
-	}
-	if rules.System {
-		granted = append(granted, "SYSTEM")
-	}
-	if rules.Tasks {
-		granted = append(granted, "TASKS")
-	}
-	if rules.Volumes {
-		granted = append(granted, "VOLUMES")
-	}
+	return granted
+}
 
-	logger.Infof("  Granted endpoints: %v", granted)
-
-	// Log HTTP methods
+// getAllowedMethods returns a list of allowed HTTP methods
+func getAllowedMethods(rules config.AccessRules) []string {
 	methods := []string{"GET", "HEAD"}
 	if rules.Post {
 		methods = append(methods, "POST")
@@ -254,10 +248,5 @@ func logConfiguration(logger *logrus.Logger, cfg *config.Config) {
 	if rules.Put {
 		methods = append(methods, "PUT", "PATCH")
 	}
-
-	logger.Infof("  Allowed methods: %v", methods)
-
-	if !rules.Post && !rules.Delete && !rules.Put {
-		logger.Warn("  ⚠️  Read-only mode enabled (POST, DELETE, PUT disabled)")
-	}
+	return methods
 }

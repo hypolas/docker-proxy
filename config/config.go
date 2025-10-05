@@ -28,7 +28,7 @@ type AccessRules struct {
 	Version bool
 
 	// API endpoints
-	Auth       bool
+	Auth bool
 	Build      bool
 	Commit     bool
 	Configs    bool

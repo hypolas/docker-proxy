@@ -82,7 +82,7 @@ func loadVolumeFilters() *filters.VolumeFilter {
 	return vf
 }
 
-// loadContainerFilters charge les filtres de conteneurs depuis l'environnement
+// loadContainerFilters loads container filters from environment
 func loadContainerFilters() *filters.ContainerFilter {
 	cf := &filters.ContainerFilter{}
 	hasFilter := false
