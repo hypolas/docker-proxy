@@ -5,6 +5,7 @@ run:
   timeout: 5m
   tests: true
   modules-download-mode: readonly
+  go: '1.21'  # Specify Go version for consistent linting
 
 linters:
   enable:
@@ -24,6 +25,13 @@ linters:
     - dupl         # Find duplicated code
     - prealloc     # Find slice declarations that could potentially be preallocated
 
+  # Disable deprecated linters
+  disable:
+    - structcheck  # Deprecated since v1.49.0
+    - varcheck     # Deprecated since v1.49.0
+    - deadcode     # Deprecated since v1.49.0
+    - ifshort      # Deprecated since v1.48.0
+
 linters-settings:
   gocyclo:
     min-complexity: 15
@@ -34,33 +42,95 @@ linters-settings:
 
   misspell:
     locale: US
+    # Ignore common false positives
+    ignore-words:
+      - someword
 
   gosec:
+    # Specify rules to exclude
     excludes:
       - G204  # Subprocess with variable (needed for Docker operations)
       - G304  # File path provided as taint input (needed for config files)
 
+    # Configure severity levels
+    severity: medium
+    confidence: medium
+
+  errcheck:
+    # Check type assertions
+    check-type-assertions: true
+    # Check blank assignments
+    check-blank: false
+
+  govet:
+    # Enable all analyzers
+    enable-all: true
+    # Disable specific analyzers if needed
+    disable:
+      - shadow
+
 issues:
   exclude-rules:
-    # Exclude some linters from running on tests files
+    # Exclude some linters from running on test files
     - path: _test\.go
       linters:
         - gocyclo
         - errcheck
         - dupl
         - gosec
+        - goconst
 
     # Exclude known issues
     - text: weak cryptographic primitive
       linters:
         - gosec
 
+    # Exclude some staticcheck messages
+    - linters:
+        - staticcheck
+      text: "SA9003:"
+
+  # Maximum issues count per one linter (0 = unlimited)
   max-issues-per-linter: 0
+
+  # Maximum count of issues with the same text (0 = unlimited)
   max-same-issues: 0
 
+  # Show only new issues created after git revision
+  # new-from-rev: HEAD
+
+  # Fix issues automatically if possible
+  fix: false
+
 output:
+  # Format: colored-line-number|line-number|json|tab|checkstyle|code-climate|html|junit-xml|github-actions
   formats:
     - format: colored-line-number
+      path: stdout
+
+  # Print lines of code with issue
   print-issued-lines: true
+
+  # Print linter name in the end of issue text
   print-linter-name: true
+
+  # Make issues output unique by line
+  uniq-by-line: true
+
+  # Sort results by: filepath, line, and column
   sort-results: true
+
+  # Show statistics per linter
+  show-stats: false
+
+# Severity settings
+severity:
+  # Default value is empty string
+  # Set the default severity for issues
+  default-severity: error
+
+  # Severity rules (optional)
+  rules:
+    - linters:
+        - dupl
+      severity: warning
