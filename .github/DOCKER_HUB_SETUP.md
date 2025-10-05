@@ -68,11 +68,19 @@ git push origin v1.0.0
 
 ### Docker Hub tags generated:
 
-For tag `v1.2.3`, the workflow creates:
-- `hypolas/proxy-docker:1.2.3` (full version)
-- `hypolas/proxy-docker:1.2` (major.minor)
-- `hypolas/proxy-docker:1` (major only)
-- `hypolas/proxy-docker:latest` (if on default branch)
+**⚠️ Important:** The `v` prefix is automatically removed from Docker tags.
+
+| Git Tag | Docker Tags Created |
+|---------|---------------------|
+| `v1.2.3` | `1.2.3`, `1.2`, `1`, `latest` |
+| `v2.0.0` | `2.0.0`, `2.0`, `2`, `latest` |
+| `v1.5.0-beta` | `1.5.0-beta` (pre-release, no latest) |
+
+**Example for Git tag `v1.2.3`:**
+- ✅ `hypolas/proxy-docker:1.2.3` ← Full version (v removed)
+- ✅ `hypolas/proxy-docker:1.2` ← Major.minor
+- ✅ `hypolas/proxy-docker:1` ← Major only
+- ✅ `hypolas/proxy-docker:latest` ← If stable release
 
 ## 🚀 Step 4: Verify the Workflow
 

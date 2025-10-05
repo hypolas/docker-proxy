@@ -21,12 +21,14 @@ Automatically builds and publishes multi-platform Docker images to Docker Hub wh
 
 **Docker tags created:**
 
-For tag `v1.2.3`:
+**Note:** The `v` prefix is automatically removed from Docker tags.
+
+For Git tag `v1.2.3`:
 ```
-hypolas/proxy-docker:1.2.3
-hypolas/proxy-docker:1.2
-hypolas/proxy-docker:1
-hypolas/proxy-docker:latest
+hypolas/proxy-docker:1.2.3    ← Full version (v removed)
+hypolas/proxy-docker:1.2      ← Major.minor
+hypolas/proxy-docker:1        ← Major
+hypolas/proxy-docker:latest   ← Latest stable
 ```
 
 **Setup required:** See [DOCKER_HUB_SETUP.md](DOCKER_HUB_SETUP.md)
