@@ -1,232 +1,196 @@
-# Docker Socket Proxy - Sécurité CI/CD & Contrôle d'Accès Granulaire
+# Docker Socket Proxy - CI/CD Security & Granular Access Control
 
-> **Proxy Docker sécurisé pour CI/CD, DevOps et environnements multi-tenants** avec système de filtrage avancé et granulaire.
+> **Secure Docker proxy for CI/CD, DevOps and multi-tenant environments** with advanced and granular filtering system.
 
-Un proxy de socket Docker professionnel avec **filtrage regex avancé**, conçu spécifiquement pour **sécuriser les pipelines CI/CD** (GitHub Actions, GitLab CI, Jenkins, CircleCI, etc.) et les **environnements cloud-native**. Inspiré de [Tecnativa/docker-socket-proxy](https://github.com/Tecnativa/docker-socket-proxy), implémenté en Go haute performance avec Gin et Resty.
+[![Docker Hub](https://img.shields.io/docker/pulls/hypolas/proxy-docker)](https://hub.docker.com/r/hypolas/proxy-docker)
+[![GitHub](https://img.shields.io/github/stars/hypolas/docker-proxy?style=social)](https://github.com/hypolas/docker-proxy)
+[![License](https://img.shields.io/badge/License-Dual%20(GPL--3.0%20%2B%20Commercial)-blue)](LICENSE)
 
-## 🎯 Cas d'Usage Principaux
+A professional Docker socket proxy with **advanced regex filtering**, specifically designed to **secure CI/CD pipelines** (GitHub Actions, GitLab CI, Jenkins, CircleCI, etc.) and **cloud-native environments**. Inspired by [Tecnativa/docker-socket-proxy](https://github.com/Tecnativa/docker-socket-proxy), implemented in high-performance Go with Gin and Resty.
+
+**🐳 Docker Hub:** [hypolas/proxy-docker](https://hub.docker.com/r/hypolas/proxy-docker)
+**📦 GitHub:** [hypolas/docker-proxy](https://github.com/hypolas/docker-proxy)
+
+## 🎯 Main Use Cases
 
 ### 🔧 CI/CD & DevOps
-**Idéal pour sécuriser vos pipelines CI/CD** en exposant uniquement les fonctionnalités Docker nécessaires :
-- ✅ **GitHub Actions, GitLab CI, Jenkins** : Limitez les actions Docker autorisées
-- ✅ **Docker-in-Docker (DinD)** sécurisé : Contrôlez build, push, run
-- ✅ **Registry privé obligatoire** : Forcez l'utilisation de vos registries internes
-- ✅ **Interdiction de :latest** : Imposez le versioning sémantique
-- ✅ **Audit complet** : Logs structurés de toutes les opérations
+**Ideal for securing your CI/CD pipelines** by exposing only the necessary Docker functionalities:
+- ✅ **GitHub Actions, GitLab CI, Jenkins**: Limit allowed Docker actions
+- ✅ **Secure Docker-in-Docker (DinD)**: Control build, push, run
+- ✅ **Mandatory private registry**: Force usage of your internal registries
+- ✅ **Ban :latest tag**: Enforce semantic versioning
+- ✅ **Complete audit**: Structured logs of all operations
 
-### ☁️ Plateformes Cloud & Multi-tenant
-- **Kubernetes, Docker Swarm, Nomad** : Isolation entre namespaces/tenants
-- **PaaS & Container-as-a-Service** : Contrôle granulaire par client
-- **Environnements partagés** : Sécurité et isolation stricte
+### ☁️ Cloud Platforms & Multi-tenant
+- **Kubernetes, Docker Swarm, Nomad**: Isolation between namespaces/tenants
+- **PaaS & Container-as-a-Service**: Granular control per client
+- **Shared environments**: Strict security and isolation
 
-### 🏢 Entreprise & Production
-- **Zero-trust architecture** : Principe du moindre privilège appliqué
-- **Compliance & Audit** : Traçabilité complète des opérations
-- **Sécurité multi-couches** : Protection contre l'escalade de privilèges
+### 🏢 Enterprise & Production
+- **Zero-trust architecture**: Least privilege principle applied
+- **Compliance & Audit**: Complete traceability of operations
+- **Multi-layer security**: Protection against privilege escalation
 
 ---
 
-## ✨ Fonctionnalités Principales
+## ✨ Main Features
 
-### 🚀 Pourquoi ce proxy ?
+### 🚀 Why This Proxy?
 
-Ce proxy Docker offre une **sécurité avancée pour vos environnements Docker** grâce à :
-- **Policy enforcement** et **RBAC** pour Docker API
-- **Admission control** pour conteneurs avec filtres regex
-- **Zero-trust architecture** appliquée au socket Docker
-- **Multi-tenant isolation** avec contrôle granulaire par namespace
-- **Container escape prevention** via restrictions de volumes et privilèges
-- **Audit trail** complet de toutes les opérations Docker
+This Docker proxy offers **advanced security for your Docker environments** through:
+- **Policy enforcement** and **RBAC** for Docker API
+- **Admission control** for containers with regex filters
+- **Zero-trust architecture** applied to Docker socket
+- **Multi-tenant isolation** with granular namespace control
+- **Container escape prevention** via volume and privilege restrictions
+- **Complete audit trail** of all Docker operations
 
-Idéal pour **cloud-native security**, **Kubernetes**, **Docker Swarm**, **PaaS**, et **CI/CD pipelines** (GitHub Actions, GitLab CI, Jenkins, CircleCI, Azure DevOps).
+Ideal for **cloud-native security**, **Kubernetes**, **Docker Swarm**, **PaaS**, and **CI/CD pipelines** (GitHub Actions, GitLab CI, Jenkins, CircleCI, Azure DevOps).
 
-### 🎯 Contrôle d'Accès Granulaire
-- **ACL par endpoint** : Activez uniquement les endpoints Docker nécessaires
-- **Filtres avancés avec regex** : Contrôle précis sur volumes, conteneurs, images, réseaux
-- **Filtrage de contenu** : Inspectez et validez les requêtes avant de les transmettre
-- **Configuration flexible** : JSON ou variables d'environnement (prioritaires)
+### 🎯 Granular Access Control
+- **ACL per endpoint**: Enable only necessary Docker endpoints
+- **Advanced filters with regex**: Precise control over volumes, containers, images, networks
+- **Content filtering**: Inspect and validate requests before forwarding
+- **Flexible configuration**: JSON or environment variables (priority)
 
-### 🔐 Sécurité Multi-Couches
-- **Protection du socket Docker** : Bloqué par défaut pour éviter l'escalade de privilèges
-- **Auto-protection** : Le proxy se protège lui-même contre toute manipulation
-- **Mode lecture seule** : Désactiver POST/DELETE/PUT par défaut
-- **Détection automatique** : Version de l'API Docker auto-détectée
+### 🔐 Multi-Layer Security
+- **Docker socket protection**: Blocked by default to prevent privilege escalation
+- **Self-protection**: Proxy protects itself against any manipulation
+- **Read-only mode**: Disable POST/DELETE/PUT by default
+- **Auto-detection**: Docker API version auto-detected
 
-### 🛠️ Exemples de Filtres Avancés
+### 🛠️ Advanced Filter Examples
 ```bash
-# Interdire montage de répertoires sensibles
+# Block mounting sensitive directories
 export DKRPRX__VOLUMES__DENIED_PATHS="^/etc/.*,^/root/.*,^/home/.*"
 
-# Autoriser uniquement images d'un registry privé
+# Allow only images from a private registry
 export DKRPRX__CONTAINERS__ALLOWED_IMAGES="^registry.company.com/.*"
 
-# Interdire tag :latest
+# Block :latest tag
 export DKRPRX__IMAGES__DENIED_TAGS="^latest$"
 
-# Interdire conteneurs privilégiés
+# Block privileged containers
 export DKRPRX__CONTAINERS__DENY_PRIVILEGED="true"
 
-# Exiger des labels spécifiques
+# Require specific labels
 export DKRPRX__CONTAINERS__REQUIRE_LABELS="env=production,team=backend"
 ```
 
-## ⚠️ Avertissement de Responsabilité
+## ⚠️ Disclaimer
 
-**CE LOGICIEL EST FOURNI "TEL QUEL", SANS GARANTIE D'AUCUNE SORTE.**
+**THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.**
 
-Le développeur décline toute responsabilité concernant :
-- Les dommages directs ou indirects causés par l'utilisation de ce logiciel
-- Les failles de sécurité ou vulnérabilités
-- La perte de données ou l'interruption de service
-- Toute utilisation malveillante ou inappropriée
+The developer disclaims all liability concerning:
+- Direct or indirect damages caused by using this software
+- Security flaws or vulnerabilities
+- Data loss or service interruption
+- Any malicious or inappropriate use
 
-**Vous utilisez ce proxy à vos propres risques.** Il est de votre responsabilité de :
-- Configurer correctement les filtres de sécurité
-- Tester la configuration dans un environnement de développement
-- Auditer régulièrement les accès et les logs
-- Ne JAMAIS exposer le proxy sur un réseau public
-
-## 📜 Licence Double (GPL-3.0 + Commerciale)
-
-Ce projet utilise un **modèle de licence double** (comme Qt, MySQL, GitLab) :
-
-### 🆓 Option 1 : GPL-3.0 (GRATUIT)
-
-**✅ Utilisation GRATUITE si vous :**
-- Partagez vos modifications (open-source)
-- Distribuez le code source
-- Utilisez GPL-3.0 pour votre projet
-
-**📋 Obligations GPL-3.0 :**
-- Partager vos modifications sous GPL-3.0
-- Fournir le code source aux utilisateurs
-- Conserver les mentions de copyright
-- Propager la licence GPL-3.0
-
-**Parfait pour :**
-- Projets open-source
-- Recherche & éducation
-- Usage personnel
-- Entreprises qui partagent leur code
-
----
-
-### 💼 Option 2 : Licence Commerciale (PAYANTE)
-
-**Licence commerciale requise si vous :**
-- ❌ Ne voulez PAS partager votre code source
-- ❌ Utilisez dans un produit propriétaire/fermé
-- ❌ Fournissez un SaaS sans partager le code
-- ❌ Intégrez dans un système embarqué fermé
-
-**✅ Avantages licence commerciale :**
-- Pas d'obligation de partager le code
-- Aucune contrainte GPL
-- Support prioritaire inclus
-- Termes personnalisables
-
-**💰 Tarification indicative :**
-
-| Licence | Employés | Prix/an | Support |
-|---------|----------|---------|---------|
-| **Startup** | < 10 | €500 | Email 48h |
-| **SME** | < 100 | €2,000 | Email 24h |
-| **Enterprise** | > 100 | €10,000 | Priority 4h |
-| **OEM** | Sur mesure | Custom | Dédié |
-
----
-
-### 📧 Obtenir une Licence Commerciale
-
-**Contact :**
-- 📧 Email : nicolas.hypolite@gmail.com
-- 🌐 Web : https://github.com/hypolas/docker-proxy
-- 📄 Template : Voir [LICENSE-COMMERCIAL](LICENSE-COMMERCIAL)
-
-**Process :**
-1. Contactez-nous avec vos besoins
-2. Recevez un devis personnalisé
-3. Signez l'accord de licence
-4. Recevez votre licence immédiatement
-
----
-
-### 🔍 Quelle licence choisir ?
-
-| Si vous voulez... | Utilisez |
-|-------------------|----------|
-| Contribuer à l'open-source | GPL-3.0 (gratuit) |
-| Garder votre code privé | Commerciale (payant) |
-| Projet personnel/éducatif | GPL-3.0 (gratuit) |
-| Produit SaaS commercial | Commerciale (payant) |
-| Startup qui débute | GPL-3.0 puis commercial plus tard |
-
----
-
-**📖 Détails complets :** Voir [LICENSE](LICENSE) pour tous les termes juridiques.
-
-**⚖️ Compatibilité :** Compatible avec toutes nos dépendances (Docker SDK/Apache 2.0, Gin/MIT, etc.)
+**You use this proxy at your own risk.** It is your responsibility to:
+- Properly configure security filters
+- Test the configuration in a development environment
+- Regularly audit access and logs
+- NEVER expose the proxy on a public network
 
 ## 🚀 Installation
 
+### Option 1: Docker Hub (Recommended)
+
+Pull the pre-built image from Docker Hub:
+
 ```bash
+# Pull latest version
+docker pull hypolas/proxy-docker:latest
+
+# Or specific version
+docker pull hypolas/proxy-docker:1.0.0
+
+# Run it
+docker run -d \
+  --name docker-proxy \
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
+  -p 2375:2375 \
+  -e CONTAINERS=1 \
+  -e IMAGES=1 \
+  hypolas/proxy-docker:latest
+```
+
+**Multi-platform support:**
+- ✅ `linux/amd64` (x86_64)
+- ✅ `linux/arm64` (ARM 64-bit - Raspberry Pi 4, Apple M1/M2, AWS Graviton)
+- ✅ `linux/arm/v7` (ARM 32-bit - Raspberry Pi 2/3)
+
+### Option 2: Build from Source
+
+```bash
+# Clone repository
+git clone https://github.com/hypolas/docker-proxy.git
+cd docker-proxy
+
+# Build binary
 go mod download
 go build -o docker-proxy ./cmd/docker-proxy
+
+# Or build Docker image
+docker build -t hypolas/proxy-docker .
 ```
 
 ## 📋 Configuration
 
-La configuration se fait via des variables d'environnement :
+Configuration is done via environment variables:
 
-### Configuration de base
+### Basic Configuration
 
-| Variable | Description | Défaut |
+| Variable | Description | Default |
 |----------|-------------|---------|
-| `LISTEN_ADDR` | Adresse d'écoute TCP | `:2375` |
-| `LISTEN_SOCKET` | Chemin vers le socket Unix pour écouter (optionnel, prioritaire sur LISTEN_ADDR) | - |
-| `DOCKER_SOCKET` | Chemin vers le socket Docker | `unix:///var/run/docker.sock` |
-| `LOG_LEVEL` | Niveau de log (debug, info, warn, error) | `info` |
-| `API_VERSION` | Version de l'API Docker (auto-détectée si non définie) | Auto-détection |
-| `SOCKET_PERMS` | Permissions du socket Unix (format octal) | `0666` |
+| `LISTEN_SOCKET` | 🔒 **Recommended**: Unix socket to listen on (format: `unix:///path` or `/path`). Takes priority over `LISTEN_ADDR`. More secure than TCP. | - |
+| `LISTEN_ADDR` | TCP listen address (less secure, use `LISTEN_SOCKET` if possible) | `:2375` |
+| `DOCKER_SOCKET` | Path to Docker socket (formats: `unix:///path`, `/path`, or `tcp://host:port`) | `unix:///var/run/docker.sock` |
+| `LOG_LEVEL` | Log level (debug, info, warn, error) | `info` |
+| `API_VERSION` | Docker API version (auto-detected if not set) | Auto-detection |
+| `SOCKET_PERMS` | Permissions for Unix socket created by proxy (octal format) | `0666` |
 
-### Contrôle d'accès aux endpoints
+> 🔒 **Security**: Prefer `LISTEN_SOCKET` (Unix socket) over `LISTEN_ADDR` (TCP). Unix sockets offer better permission control via the filesystem and avoid network exposure.
 
-Par défaut **autorisés** (valeur: `1`) :
-- `EVENTS` - Événements Docker
+### Endpoint Access Control
+
+Allowed **by default** (value: `1`):
+- `EVENTS` - Docker events
 - `PING` - Healthcheck
-- `VERSION` - Version de Docker
+- `VERSION` - Docker version
 
-Par défaut **refusés** (valeur: `0`), doivent être activés explicitement :
-- `AUTH` - Authentification
-- `BUILD` - Construction d'images
-- `COMMIT` - Commit de conteneurs
-- `CONFIGS` - Configurations Swarm
-- `CONTAINERS` - Gestion des conteneurs
-- `DISTRIBUTION` - Distribution d'images
-- `EXEC` - Exécution de commandes
-- `IMAGES` - Gestion des images
-- `INFO` - Informations système
-- `NETWORKS` - Gestion des réseaux
-- `NODES` - Nœuds Swarm
-- `PLUGINS` - Plugins Docker
-- `SECRETS` - Secrets Swarm
-- `SERVICES` - Services Swarm
+**Denied** by default (value: `0`), must be explicitly enabled:
+- `AUTH` - Authentication
+- `BUILD` - Image building
+- `COMMIT` - Container commit
+- `CONFIGS` - Swarm configs
+- `CONTAINERS` - Container management
+- `DISTRIBUTION` - Image distribution
+- `EXEC` - Command execution
+- `IMAGES` - Image management
+- `INFO` - System information
+- `NETWORKS` - Network management
+- `NODES` - Swarm nodes
+- `PLUGINS` - Docker plugins
+- `SECRETS` - Swarm secrets
+- `SERVICES` - Swarm services
 - `SESSION` - Sessions
 - `SWARM` - Swarm mode
-- `SYSTEM` - Système Docker
-- `TASKS` - Tâches Swarm
-- `VOLUMES` - Gestion des volumes
+- `SYSTEM` - Docker system
+- `TASKS` - Swarm tasks
+- `VOLUMES` - Volume management
 
-### Méthodes HTTP
+### HTTP Methods
 
-- `GET`, `HEAD` : Toujours autorisées (lecture seule)
-- `POST` : Défaut `0` (variable `POST=1` pour activer)
-- `DELETE` : Défaut `0` (variable `DELETE=1` pour activer)
-- `PUT`, `PATCH` : Défaut `0` (variable `PUT=1` pour activer)
+- `GET`, `HEAD`: Always allowed (read-only)
+- `POST`: Default `0` (set `POST=1` to enable)
+- `DELETE`: Default `0` (set `DELETE=1` to enable)
+- `PUT`, `PATCH`: Default `0` (set `PUT=1` to enable)
 
-## 💡 Exemples d'utilisation
+## 💡 Usage Examples
 
-### Mode lecture seule (défaut)
+### Read-only mode (default)
 
 ```bash
 export CONTAINERS=1
@@ -234,7 +198,7 @@ export IMAGES=1
 ./docker-proxy
 ```
 
-### Mode lecture/écriture
+### Read-write mode
 
 ```bash
 export CONTAINERS=1
@@ -244,92 +208,72 @@ export DELETE=1
 ./docker-proxy
 ```
 
-### Écoute sur Unix socket
+### Listen on Unix socket (recommended for security)
 
 ```bash
-# Écoute sur Unix socket au lieu de TCP
-export LISTEN_SOCKET=/tmp/docker-proxy.sock
+# Listen on Unix socket instead of TCP
+export LISTEN_SOCKET=unix:///tmp/docker-proxy.sock
 export CONTAINERS=1
 export IMAGES=1
 ./docker-proxy
 
-# Test avec curl
+# Test with curl
 curl --unix-socket /tmp/docker-proxy.sock http://localhost/v1.41/containers/json
 ```
 
-> ℹ️ `LISTEN_SOCKET` prend toujours le pas sur `LISTEN_ADDR`. Pensez à ajuster `SOCKET_PERMS` si le socket doit être partagé avec d’autres utilisateurs (ex. `export SOCKET_PERMS=0660`).
+> 🔒 **Security**: `LISTEN_SOCKET` always takes precedence over `LISTEN_ADDR`. Unix sockets avoid network exposure and offer better permission control.
+>
+> ⚠️ **Docker**: If you use `LISTEN_SOCKET=unix:///tmp/docker-proxy.sock`, you must mount the corresponding directory in volumes: `-v /tmp:/tmp`. The path in the `unix:///path` format must match the mounted volume.
 
 # Architecture
+## With a Docker agent:
 
-## Runner direct on host
-
-```mermaid
-graph TB;
-    subgraph "CI/CD Runner"
-        A["Pipeline (docker build/push)"];
-
-    end
-
-    subgraph "Proxy Host"
-        B[Docker Proxy<br>LISTEN_SOCKET=/tmp/docker-proxy.sock]
-        C[(Unix Socket<br>/tmp/docker-proxy.sock)]
-    end
-
-    subgraph "Docker Host"
-        D[(Docker Socket<br>/var/run/docker.sock)]
-        E[Docker Engine]
-    end
-
-    A -- "DOCKER_HOST=unix:///tmp/docker-proxy.sock" --> B
-    B -- binds --> C
-    C -- proxy traffic --> D
-    D -- native socket --> E
-```
-
-## With a Docker agent:
-
-Proxy comfiguration sample:
+Proxy configuration sample:
 
 ```yaml
 services:
   docker-proxy:
     build: .
-    image: hypolas-docker-proxy:latest
+    image: hypolas/proxy-docker:latest
     container_name: docker-proxy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /tmp:/tmp  # ⚠️ IMPORTANT: must match the path in LISTEN_SOCKET
     environment:
-      # Configuration de base
-      - LISTEN_SOCKET=/tmp/docker_proxy.sock
-      - DOCKER_SOCKET=unix:///var/run/doc
+      # Basic configuration (unix:// format recommended)
+      - LISTEN_SOCKET=unix:///tmp/docker_proxy.sock
+      - DOCKER_SOCKET=unix:///var/run/docker.sock
 ```
+
+> ⚠️ **Important**: The mounted volume (`/tmp:/tmp`) must match the path defined in `LISTEN_SOCKET`. If you use `LISTEN_SOCKET=unix:///tmp/docker_proxy.sock`, you must mount `/tmp:/tmp`.
 
 ```mermaid
-graph TB;
-    subgraph "Agent in Docker"
-        AgentGetTask["Get tasks from pipeline"];
+graph TB
+    subgraph "Agent Container"
+        agent[CI/CD agent]
     end
 
-    subgraph "Docker Proxy"
-        ProgrammeProxy[Programme];
-        ProxySocket[[Unix Socket<br>/tmp/docker-proxy.sock]];
-        DockerSocket[[Unix Socket<br>/var/run/docker.sock]];
+    subgraph "Proxy Container"
+        proxy[docker-proxy]
+        proxySock[[unix:///tmp/docker_proxy.sock]]
     end
 
-    subgraph "Docker Engine"
-        ProgrammeDocker[Docker];
-        ProxySocket[[Unix Socket<br>/tmp/docker-proxy.sock]];
-        DockerSocket[[Unix Socket<br>/var/run/docker.sock]];
+    subgraph "Docker Host"
+        dockerSock[[/var/run/docker.sock]]
+        engine[(Docker Engine)]
     end
 
-    AgentGetTask -- "Send to proxy socket" --> ProxySocket
-    ProgrammeProxy -- "Listen" --> ProxySocket
-    ProgrammeProxy -- "Filter to" --> DockerSocket
-    ProgrammeDocker -- "Listen" --> DockerSocket
-  
+    start((Start))
+    start --> agent[CI/CD agent]
+    agent -->|Docker API calls| proxySock
+    proxy <-- binds --> proxySock
+    proxy -->|validates & forwards| dockerSock
+    dockerSock -->|native API| engine
+    engine -->|responses| proxy
+    proxy -->|responses| agent
 ```
 
-### 🔧 Intégration CI/CD
+### 🔧 CI/CD Integration
 
 #### GitHub Actions
 
@@ -340,15 +284,15 @@ on: [push]
 
 services:
   docker-proxy:
-    image: your-registry/docker-proxy:latest
+    image: hypolas/proxy-docker:latest
     env:
       CONTAINERS: 1
       IMAGES: 1
       BUILD: 1
       POST: 1
-      # Forcer registry privé
+      # Force private registry
       DKRPRX__CONTAINERS__ALLOWED_IMAGES: "^registry.company.com/.*"
-      # Interdire :latest
+      # Block :latest
       DKRPRX__IMAGES__DENIED_TAGS: "^latest$"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -372,7 +316,7 @@ variables:
   DOCKER_HOST: tcp://docker-proxy:2375
 
 services:
-  - name: your-registry/docker-proxy:latest
+  - name: hypolas/proxy-docker:latest
     alias: docker-proxy
     variables:
       CONTAINERS: "1"
@@ -405,7 +349,7 @@ pipeline {
 }
 ```
 
-### Avec Docker Compose
+### With Docker Compose
 
 ```yaml
 services:
@@ -425,7 +369,7 @@ services:
       - LOG_LEVEL=info
 ```
 
-### Avec Dockerfile
+### With Dockerfile
 
 ```dockerfile
 FROM golang:1.21-alpine AS builder
@@ -453,93 +397,93 @@ CMD ["./docker-proxy"]
 ```
 .
 ├── cmd/
-│   └── docker-proxy/       # Point d'entrée de l'application
+│   └── docker-proxy/       # Application entry point
 │       └── main.go
-├── config/                 # Configuration et chargement des env vars
+├── config/                 # Configuration and env var loading
 │   └── config.go
 ├── internal/
-│   ├── middleware/         # Middlewares Gin
-│   │   ├── acl.go         # Contrôle d'accès
-│   │   └── logging.go     # Logging structuré
-│   └── proxy/             # Handler de proxy
+│   ├── middleware/         # Gin middlewares
+│   │   ├── acl.go         # Access control
+│   │   └── logging.go     # Structured logging
+│   └── proxy/             # Proxy handler
 │       └── handler.go
 └── pkg/
-    └── rules/             # Moteur de règles d'accès
+    └── rules/             # Access rules engine
         └── matcher.go
 ```
 
-## 🔐 Système de Filtrage Avancé
+## 🔐 Advanced Filtering System
 
-**Le point fort de ce proxy : un système de filtrage extrêmement granulaire et puissant.**
+**The proxy's strength: an extremely granular and powerful filtering system.**
 
-### 🎯 Contrôle Précis avec Regex
+### 🎯 Precise Control with Regex
 
-Contrairement aux proxies basiques, ce proxy permet de **contrôler finement chaque aspect** des opérations Docker via des patterns regex :
+Unlike basic proxies, this proxy allows **fine-grained control of every aspect** of Docker operations via regex patterns:
 
-#### 📦 Filtres de Volumes
+#### 📦 Volume Filters
 ```bash
-# Autoriser uniquement volumes nommés spécifiques
+# Allow only specific named volumes
 export DKRPRX__VOLUMES__ALLOWED_NAMES="^data-.*,^app-.*,^logs-.*"
 
-# Interdire montage de répertoires système sensibles
+# Block mounting sensitive system directories
 export DKRPRX__VOLUMES__DENIED_PATHS="^/etc/.*,^/root/.*,^/sys/.*,^/proc/.*,^/var/run/.*"
 
-# Autoriser uniquement bind mounts dans /data
+# Allow only bind mounts in /data
 export DKRPRX__VOLUMES__ALLOWED_PATHS="^/data/.*"
 
-# Restreindre aux drivers locaux
+# Restrict to local drivers
 export DKRPRX__VOLUMES__ALLOWED_DRIVERS="local"
 ```
 
-#### 🐳 Filtres de Conteneurs
+#### 🐳 Container Filters
 ```bash
-# Autoriser uniquement images d'un registry privé avec version sémantique
+# Allow only images from private registry with semantic versioning
 export DKRPRX__CONTAINERS__ALLOWED_IMAGES="^registry.company.com/.*:v[0-9]+\.[0-9]+\.[0-9]+$"
 
-# Interdire toute image avec tag :latest ou :dev
+# Block any image with :latest or :dev tag
 export DKRPRX__CONTAINERS__DENIED_IMAGES=".*:(latest|dev|test)$"
 
-# Exiger des noms de conteneurs préfixés par l'environnement
+# Require container names prefixed by environment
 export DKRPRX__CONTAINERS__ALLOWED_NAMES="^(prod|staging|dev)-.*"
 
-# Exiger des labels obligatoires
+# Require mandatory labels
 export DKRPRX__CONTAINERS__REQUIRE_LABELS="env=production,team=backend,cost-center=IT-001"
 
-# Interdire conteneurs privilégiés et host network
+# Block privileged containers and host network
 export DKRPRX__CONTAINERS__DENY_PRIVILEGED="true"
 export DKRPRX__CONTAINERS__DENY_HOST_NETWORK="true"
 ```
 
-#### 🖼️ Filtres d'Images
+#### 🖼️ Image Filters
 ```bash
-# Autoriser uniquement registries approuvés
+# Allow only approved registries
 export DKRPRX__IMAGES__ALLOWED_REPOS="^(docker\.io/library|registry\.company\.com)/.*"
 
-# Interdire registries non sécurisés
+# Block insecure registries
 export DKRPRX__IMAGES__DENIED_REPOS=".*\.(cn|ru|suspicious)/"
 
-# Autoriser uniquement tags versionnés (semver)
+# Allow only versioned tags (semver)
 export DKRPRX__IMAGES__ALLOWED_TAGS="^v[0-9]+\.[0-9]+\.[0-9]+$"
 
-# Interdire tags de développement
+# Block development tags
 export DKRPRX__IMAGES__DENIED_TAGS="^(latest|dev|test|alpha|beta|rc).*"
 ```
 
-#### 🌐 Filtres de Réseaux
+#### 🌐 Network Filters
 ```bash
-# Autoriser uniquement réseaux applicatifs
+# Allow only application networks
 export DKRPRX__NETWORKS__ALLOWED_NAMES="^app-.*"
 
-# Interdire réseau host (sécurité)
+# Block host network (security)
 export DKRPRX__NETWORKS__DENIED_NAMES="^host$"
 
-# Restreindre aux drivers bridge et overlay
+# Restrict to bridge and overlay drivers
 export DKRPRX__NETWORKS__ALLOWED_DRIVERS="bridge,overlay"
 ```
 
 ### 📋 Configuration via JSON (Alternative)
 
-Pour des configurations complexes, utilisez JSON :
+For complex configurations, use JSON:
 
 ```json
 {
@@ -573,11 +517,11 @@ Pour des configurations complexes, utilisez JSON :
 export FILTERS_CONFIG=./filters.json
 ```
 
-**Note :** Les variables d'environnement sont **prioritaires** sur le JSON.
+**Note:** Environment variables take **priority** over JSON.
 
-### 💡 Cas d'Usage Avancés
+### 💡 Advanced Use Cases
 
-#### Multi-tenant avec Isolation
+#### Multi-tenant with Isolation
 ```bash
 TENANT_ID="client-123"
 export DKRPRX__VOLUMES__ALLOWED_NAMES="^${TENANT_ID}-.*"
@@ -586,147 +530,147 @@ export DKRPRX__CONTAINERS__REQUIRE_LABELS="tenant=${TENANT_ID}"
 export DKRPRX__NETWORKS__ALLOWED_NAMES="^${TENANT_ID}-.*"
 ```
 
-#### Environnement de Production Strict
+#### Strict Production Environment
 ```bash
-# Uniquement images versionnées d'un registry privé
+# Only versioned images from private registry
 export DKRPRX__CONTAINERS__ALLOWED_IMAGES="^registry.prod.company.com/.*:v[0-9]+\.[0-9]+\.[0-9]+$"
 
-# Uniquement montages dans /data/prod
+# Only mounts in /data/prod
 export DKRPRX__VOLUMES__ALLOWED_PATHS="^/data/prod/.*"
 
-# Labels obligatoires
+# Mandatory labels
 export DKRPRX__CONTAINERS__REQUIRE_LABELS="env=production,approved=true,security-scan=passed"
 
-# Sécurité renforcée
+# Enhanced security
 export DKRPRX__CONTAINERS__DENY_PRIVILEGED="true"
 export DKRPRX__CONTAINERS__DENY_HOST_NETWORK="true"
 ```
 
-#### CI/CD avec Restrictions
+#### CI/CD with Restrictions
 ```bash
-# Autoriser build mais pas latest
+# Allow build but not latest
 export DKRPRX__IMAGES__DENIED_TAGS="^latest$"
 
-# Autoriser uniquement registry CI
+# Allow only CI registry
 export DKRPRX__IMAGES__ALLOWED_REPOS="^registry.ci.company.com/.*"
 
-# Interdire volumes sensibles
+# Block sensitive volumes
 export DKRPRX__VOLUMES__DENIED_PATHS="^/(etc|root|home|sys|proc)/.*"
 ```
 
-### 📚 Documentation Complète
+### 📚 Complete Documentation
 
-- **[ADVANCED_FILTERS.md](ADVANCED_FILTERS.md)** - Guide complet des filtres avancés avec exemples détaillés
-- **[ENV_FILTERS.md](ENV_FILTERS.md)** - Configuration via variables d'environnement
-- **[SECURITY.md](SECURITY.md)** - Guide de sécurité et vecteurs d'attaque bloqués
+- **[ADVANCED_FILTERS.md](ADVANCED_FILTERS.md)** - Complete guide to advanced filters with detailed examples
+- **[ENV_FILTERS.md](ENV_FILTERS.md)** - Configuration via environment variables
+- **[SECURITY.md](SECURITY.md)** - Security guide and blocked attack vectors
 
-**Le système de filtrage permet un contrôle aussi précis que nécessaire pour votre environnement !**
+**The filtering system allows as precise control as needed for your environment!**
 
-## 🔒 Sécurité par Défaut
+## 🔒 Security by Default
 
-Le proxy applique **plusieurs protections par défaut** pour éviter l'escalade de privilèges :
+The proxy applies **several protections by default** to prevent privilege escalation:
 
-### 🛡️ Protection du Socket Docker
-Les chemins suivants sont **bloqués par défaut** :
+### 🛡️ Docker Socket Protection
+The following paths are **blocked by default**:
 - `/var/run/docker.sock`
 - `/run/docker.sock`
 
-### 🛡️ Protection du Conteneur Proxy
-Le conteneur `docker-proxy` lui-même est **protégé contre toute manipulation** :
-- ❌ Impossible de stopper/redémarrer le conteneur proxy
-- ❌ Impossible de modifier le conteneur proxy
-- ❌ Impossible de supprimer le conteneur proxy
+### 🛡️ Proxy Container Protection
+The `docker-proxy` container itself is **protected against any manipulation**:
+- ❌ Cannot stop/restart the proxy container
+- ❌ Cannot modify the proxy container
+- ❌ Cannot delete the proxy container
 
-### 🛡️ Protection du Réseau Proxy
-Si le proxy utilise un réseau dédié, celui-ci est également protégé.
+### 🛡️ Proxy Network Protection
+If the proxy uses a dedicated network, it is also protected.
 
 ### ⚙️ Configuration
 ```bash
-# Nom du conteneur proxy (défaut: docker-proxy)
+# Proxy container name (default: docker-proxy)
 export PROXY_CONTAINER_NAME="docker-proxy"
 
-# Nom du réseau proxy (optionnel)
+# Proxy network name (optional)
 export PROXY_NETWORK_NAME="docker-proxy-network"
 ```
 
-### 🔓 Désactivation (non recommandé)
-Pour désactiver toutes les protections :
+### 🔓 Disabling (not recommended)
+To disable all protections:
 ```bash
 export DKRPRX__DISABLE_DEFAULTS="true"
 ```
 
-Pour autoriser explicitement le socket Docker :
+To explicitly allow Docker socket:
 ```bash
 export DKRPRX__VOLUMES__ALLOWED_PATHS="^/var/run/docker\\.sock$"
 ```
 
-## ⚠️ Avertissements de sécurité
+## ⚠️ Security Warnings
 
-- **N'exposez JAMAIS ce proxy sur un réseau public**
-- **Ne montez JAMAIS le socket Docker dans un conteneur non sécurisé**
-- Activez uniquement les endpoints nécessaires
-- Utilisez le mode lecture seule quand possible
-- Montez le socket Docker en lecture seule quand possible (`:ro`)
-- Utilisez les filtres avancés pour un contrôle granulaire
+- **NEVER expose this proxy on a public network**
+- **NEVER mount the Docker socket in an unsecured container**
+- Enable only necessary endpoints
+- Use read-only mode when possible
+- Mount Docker socket as read-only when possible (`:ro`)
+- Use advanced filters for granular control
 
 ## 🧪 Tests
 
-Pour tester le proxy :
+To test the proxy:
 
-### Mode TCP (défaut)
+### TCP mode (default)
 
 ```bash
-# Démarrer le proxy avec containers en lecture seule
+# Start proxy with containers in read-only
 export CONTAINERS=1
 ./docker-proxy
 
-# Dans un autre terminal
+# In another terminal
 curl http://localhost:2375/v1.41/containers/json
 
-# Tester un endpoint refusé
+# Test a denied endpoint
 curl http://localhost:2375/v1.41/images/json  # 403 Forbidden
 ```
 
-### Mode Unix socket
+### Unix socket mode
 
 ```bash
-# Démarrer le proxy sur Unix socket
+# Start proxy on Unix socket
 export LISTEN_SOCKET=/tmp/docker-proxy.sock
 export CONTAINERS=1
 ./docker-proxy
 
-# Dans un autre terminal
+# In another terminal
 curl --unix-socket /tmp/docker-proxy.sock http://localhost/v1.41/containers/json
 
-# Ou avec Docker CLI
+# Or with Docker CLI
 export DOCKER_HOST=unix:///tmp/docker-proxy.sock
 docker ps
 ```
 
-## 🔧 Intégration CI/CD
+## 🔧 CI/CD Integration
 
-Ce proxy est **spécifiquement conçu pour sécuriser les pipelines CI/CD**. Voir [CICD_EXAMPLES.md](CICD_EXAMPLES.md) pour des exemples détaillés :
+This proxy is **specifically designed to secure CI/CD pipelines**. See [CICD_EXAMPLES.md](CICD_EXAMPLES.md) for detailed examples:
 
-- **GitHub Actions** - Sécuriser Docker dans les workflows
-- **GitLab CI** - Contrôle d'accès granulaire avec services
-- **Jenkins** - Pipeline sécurisé avec Docker proxy
-- **Azure DevOps** - Intégration avec ACR
-- **CircleCI** - Build sécurisé avec remote Docker
+- **GitHub Actions** - Secure Docker in workflows
+- **GitLab CI** - Granular access control with services
+- **Jenkins** - Secure pipeline with Docker proxy
+- **Azure DevOps** - Integration with ACR
+- **CircleCI** - Secure build with remote Docker
 
-**Cas d'usage typiques :**
-- Forcer l'utilisation d'un registry privé uniquement
-- Interdire les tags `:latest`, `:dev`, `:test`
-- Bloquer les conteneurs privileged en CI
-- Audit complet des opérations Docker
-- Isolation multi-tenant dans les runners partagés
+**Typical use cases:**
+- Force use of private registry only
+- Block `:latest`, `:dev`, `:test` tags
+- Block privileged containers in CI
+- Complete audit of Docker operations
+- Multi-tenant isolation in shared runners
 
-## 🔐 Sécurité
+## 🔐 Security
 
-Voir [SECURITY.md](SECURITY.md) pour :
-- Protections par défaut implémentées
-- Vecteurs d'attaque bloqués
-- Checklist de sécurité pour la production
-- Bonnes pratiques de déploiement
+See [SECURITY.md](SECURITY.md) for:
+- Implemented default protections
+- Blocked attack vectors
+- Production security checklist
+- Deployment best practices
 
 ## 📝 License
 
@@ -741,39 +685,39 @@ Contact nicolas.hypolite@gmail.com for commercial licensing.
 
 ---
 
-## 🏆 Avantages Techniques
+## 🏆 Technical Advantages
 
 ### Architecture & Performance
-Développé en **Go (Golang)** haute performance avec **Gin framework** et **Resty HTTP client**, ce proxy offre une **API wrapper** robuste autour du **Docker Engine API** et **Docker SDK**. Support natif des **Unix sockets** et **TCP sockets** pour une intégration flexible.
+Developed in **high-performance Go (Golang)** with **Gin framework** and **Resty HTTP client**, this proxy offers a robust **API wrapper** around the **Docker Engine API** and **Docker SDK**. Native support for **Unix sockets** and **TCP sockets** for flexible integration.
 
-### Sécurité Avancée
-Implémente les principes de **zero-trust**, **least privilege**, et **defense in depth** pour prévenir :
-- **Privilege escalation prevention** : Blocage des conteneurs privileged et host network
-- **Container escape prevention** : Restrictions strictes sur volumes et bind mounts
-- **Socket injection prevention** : Protection automatique du socket Docker
+### Advanced Security
+Implements **zero-trust**, **least privilege**, and **defense in depth** principles to prevent:
+- **Privilege escalation prevention**: Block privileged containers and host network
+- **Container escape prevention**: Strict restrictions on volumes and bind mounts
+- **Socket injection prevention**: Automatic Docker socket protection
 
-### Filtrage & Contrôle
-- **Regex-based filtering** : Patterns avancés pour images, volumes, réseaux
-- **Network policy** et **volume restriction** granulaires
-- **Image policy** et **tag policy** personnalisables
-- **Label enforcement** pour conformité organisationnelle
-- **Registry whitelist** : Forcer l'utilisation de registries approuvés
+### Filtering & Control
+- **Regex-based filtering**: Advanced patterns for images, volumes, networks
+- **Network policy** and granular **volume restriction**
+- **Image policy** and customizable **tag policy**
+- **Label enforcement** for organizational compliance
+- **Registry whitelist**: Force use of approved registries
 
-### Intégrations CI/CD
-Compatibilité native avec :
+### CI/CD Integrations
+Native compatibility with:
 - **GitHub Actions**, **GitLab CI/CD**, **Jenkins**, **CircleCI**, **Azure DevOps**
 - **Travis CI**, **Drone CI**, **Bamboo**, **TeamCity**
-- **Docker-in-Docker (DinD) security** améliorée
+- Improved **Docker-in-Docker (DinD) security**
 - **Kubernetes admission controller** via webhook
 
-### Orchestrateurs & Plateformes
-Support pour :
+### Orchestrators & Platforms
+Support for:
 - **Kubernetes** (pods, deployments, namespaces)
 - **Docker Swarm** (services, stacks, secrets)
 - **HashiCorp Nomad** (jobs, tasks)
 - **Rancher**, **Portainer**, **OpenShift**
-- Toute plateforme utilisant **Docker API**
+- Any platform using **Docker API**
 
 ---
 
-**Développé pour les équipes DevOps, SRE et Security qui recherchent un contrôle granulaire sur Docker dans des environnements multi-tenants, cloud-native et CI/CD.**
+**Developed for DevOps, SRE and Security teams seeking granular control over Docker in multi-tenant, cloud-native and CI/CD environments.**

@@ -1,0 +1,30 @@
+{
+  "volumes": {
+    "allowed_names": ["^data-.*", "^app-.*"],
+    "denied_names": ["^system-.*"],
+    "allowed_paths": ["^/data/.*", "^/mnt/volumes/.*"],
+    "denied_paths": ["^/etc/.*", "^/root/.*", "^/home/.*"],
+    "allowed_drivers": ["local", "nfs"]
+  },
+  "containers": {
+    "allowed_images": ["^docker.io/.*", "^myregistry.com/.*"],
+    "denied_images": [".*:latest$"],
+    "allowed_names": ["^prod-.*", "^staging-.*"],
+    "require_labels": {
+      "env": "production"
+    },
+    "deny_privileged": true,
+    "deny_host_network": true
+  },
+  "networks": {
+    "allowed_names": ["^app-.*", "^service-.*"],
+    "denied_names": ["^host$"],
+    "allowed_drivers": ["bridge", "overlay"]
+  },
+  "images": {
+    "allowed_repos": ["^docker.io/library/.*", "^myregistry.com/.*"],
+    "denied_repos": [".*untrusted.*"],
+    "allowed_tags": ["^v[0-9]+\\.[0-9]+\\.[0-9]+$", "^stable$"],
+    "denied_tags": ["^latest$", "^dev$"]
+  }
+}

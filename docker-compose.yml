@@ -1,0 +1,39 @@
+services:
+  docker-proxy:
+    build: .
+    image: hypolas/proxy-docker:latest
+    container_name: docker-proxy
+    ports:
+      - "2375:2375"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp:/tmp
+    environment:
+      # Configuration de base
+      - LISTEN_SOCKET=unix:///tmp/docker_proxy.sock
+      # - LISTEN_ADDR=:2375
+      - DOCKER_SOCKET=unix:///var/run/docker.sock
+      - LOG_LEVEL=info
+
+      # Protection du proxy (auto-protection)
+      - PROXY_CONTAINER_NAME=docker-proxy
+      - PROXY_NETWORK_NAME=docker-proxy
+
+      # Endpoints autorisés (lecture seule)
+      - CONTAINERS=1
+      - IMAGES=1
+      - NETWORKS=1
+      - VOLUMES=0
+      - INFO=0
+
+      # Méthodes d'écriture désactivées par défaut
+      - POST=0
+      - DELETE=0
+      - PUT=0
+    restart: unless-stopped
+    networks:
+      - docker-proxy
+
+networks:
+  docker-proxy:
+    driver: bridge
