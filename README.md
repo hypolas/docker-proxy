@@ -248,7 +248,7 @@ services:
 > ⚠️ **Important**: The mounted volume (`/tmp:/tmp`) must match the path defined in `LISTEN_SOCKET`. If you use `LISTEN_SOCKET=unix:///tmp/docker_proxy.sock`, you must mount `/tmp:/tmp`.
 
 ```mermaid
-graph TB
+graph LR
     subgraph "Agent Container"
         agent[CI/CD agent]
     end
@@ -268,10 +268,11 @@ graph TB
     agent -->|"(1) Docker Proxy API calls"| proxySock
     proxy <-- "(2) binds" --> proxySock
     proxy -->|"(3 - OK ) validates & forwards"| dockerSock
-    proxy -->|"(3 - KO ) validatio failed"| agent
+    proxy -->|"(3 - KO ) validatio failed"| proxySock
     dockerSock -->|"(4) native API"| engine
     engine -->|"(5) responses"| proxy
-    proxy -->|"(6) responses"| agent
+    proxySock -->|"(6) responses"| agent
+
 ```
 
 ### 🔧 CI/CD Integration
