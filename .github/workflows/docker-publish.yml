@@ -100,6 +100,138 @@ jobs:
       #     short-description: "Secure Docker Socket Proxy with advanced filtering for CI/CD"
       #     readme-filepath: ./README.md
 
+      - name: Build binaries for multiple platforms
+        run: |
+          mkdir -p dist
+
+          # Build for Linux amd64
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/docker-proxy-linux-amd64 ./cmd/docker-proxy
+
+          # Build for Linux arm64
+          GOOS=linux GOARCH=arm64 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/docker-proxy-linux-arm64 ./cmd/docker-proxy
+
+          # Build for Linux arm v7
+          GOOS=linux GOARCH=arm GOARM=7 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/docker-proxy-linux-armv7 ./cmd/docker-proxy
+
+          # Build for macOS amd64
+          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/docker-proxy-darwin-amd64 ./cmd/docker-proxy
+
+          # Build for macOS arm64 (Apple Silicon)
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/docker-proxy-darwin-arm64 ./cmd/docker-proxy
+
+          # Build for Windows amd64
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/docker-proxy-windows-amd64.exe ./cmd/docker-proxy
+
+          # Create checksums
+          cd dist
+          sha256sum * > checksums.txt
+          cd ..
+
+          # List built files
+          ls -lh dist/
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          cat > release_notes.md << 'EOF'
+          ## 🐳 Docker Socket Proxy ${{ github.ref_name }}
+
+          Secure Docker Socket HTTP Proxy with advanced granular filtering for CI/CD pipelines.
+
+          ### 📦 Installation
+
+          #### Docker (Recommended)
+
+          TCP:
+
+          ```bash
+          docker pull hypolas/proxy-docker:${GITHUB_REF_NAME#v}
+          docker run -d --name docker-proxy \
+            -v /var/run/docker.sock:/var/run/docker.sock:ro \
+            -p 2375:2375 \
+            -e CONTAINERS=1 -e IMAGES=1 \
+            hypolas/proxy-docker:${GITHUB_REF_NAME#v}
+          ```
+
+          Socket:
+
+          ```bash
+          docker pull hypolas/proxy-docker:${GITHUB_REF_NAME#v}
+          docker run -d --name docker-proxy \
+            -v /var/run/docker.sock:/var/run/docker.sock:ro \
+            -v /tmp:/tmp \
+            -e LISTEN_SOCKET=unix:///tmp/docker-proxy.sock \
+            -e CONTAINERS=1 -e IMAGES=1 \
+            hypolas/proxy-docker:${GITHUB_REF_NAME#v}
+          ```
+
+
+          #### Binary Download
+
+          Download the appropriate binary for your platform below, make it executable, and run:
+
+          ```bash
+          # Linux amd64 example
+          chmod +x docker-proxy-linux-amd64
+          ./docker-proxy-linux-amd64 \
+            DOCKER_HOST=unix:///var/run/docker.sock \
+            LISTEN_SOCKET=unix:///tmp/docker-proxy.sock \
+            CONTAINERS=1 IMAGES=1 
+          ```
+
+          ### 🏗️ Supported Platforms
+
+          **Docker Images:**
+          - linux/amd64 (x86_64)
+          - linux/arm64 (ARM 64-bit)
+          - linux/arm/v7 (ARM 32-bit)
+
+          **Binaries:**
+          - Linux amd64, arm64, armv7
+          - macOS amd64, arm64 (Apple Silicon)
+          - Windows amd64
+
+          ### 📋 What's Changed
+
+          See commit history for detailed changes.
+
+          ### 📚 Documentation
+
+          - [README](https://github.com/hypolas/docker-proxy/blob/main/README.md)
+          - [Security Guide](https://github.com/hypolas/docker-proxy/blob/main/docs/SECURITY.md)
+          - [Configuration](https://github.com/hypolas/docker-proxy/blob/main/docs/ENV_FILTERS.md)
+          - [CI/CD Examples](https://github.com/hypolas/docker-proxy/blob/main/docs/CICD_EXAMPLES.md)
+
+          ### 📞 Support
+
+          - Report issues: https://github.com/hypolas/docker-proxy/issues
+          - Email: nicolas.hypolite@gmail.com
+
+          ---
+
+          **Full Changelog**: https://github.com/hypolas/docker-proxy/commits/${{ github.ref_name }}
+          EOF
+
+          echo "notes_file=release_notes.md" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ contains(github.ref, '-') }}
+          files: |
+            dist/docker-proxy-linux-amd64
+            dist/docker-proxy-linux-arm64
+            dist/docker-proxy-linux-armv7
+            dist/docker-proxy-darwin-amd64
+            dist/docker-proxy-darwin-arm64
+            dist/docker-proxy-windows-amd64.exe
+            dist/checksums.txt
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Generate release summary
         run: |
           echo "## 🐳 Docker Image Published" >> $GITHUB_STEP_SUMMARY
@@ -115,11 +247,20 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Platforms:** \`${{ env.PLATFORMS }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📦 GitHub Release Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Release URL:** https://github.com/hypolas/docker-proxy/releases/tag/${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Binaries:** 6 platforms + checksums" >> $GITHUB_STEP_SUMMARY
+          echo "- Linux: amd64, arm64, armv7" >> $GITHUB_STEP_SUMMARY
+          echo "- macOS: amd64, arm64" >> $GITHUB_STEP_SUMMARY
+          echo "- Windows: amd64" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Pull command:**" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "# Using semantic version (v prefix removed)" >> $GITHUB_STEP_SUMMARY
+          echo "# Docker" >> $GITHUB_STEP_SUMMARY
           echo "docker pull ${{ env.DOCKER_IMAGE }}:${GITHUB_REF_NAME#v}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "# Or use latest" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ${{ env.DOCKER_IMAGE }}:latest" >> $GITHUB_STEP_SUMMARY
+          echo "# Or download binary from:" >> $GITHUB_STEP_SUMMARY
+          echo "# https://github.com/hypolas/docker-proxy/releases/tag/${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

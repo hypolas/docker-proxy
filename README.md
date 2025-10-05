@@ -121,7 +121,37 @@ docker run -d \
 - ✅ `linux/arm64` (ARM 64-bit - Raspberry Pi 4, Apple M1/M2, AWS Graviton)
 - ✅ `linux/arm/v7` (ARM 32-bit - Raspberry Pi 2/3)
 
-### Option 2: Build from Source
+### Option 2: Pre-compiled Binaries
+
+Download ready-to-use binaries from GitHub Releases:
+
+```bash
+# Linux amd64
+wget https://github.com/hypolas/docker-proxy/releases/latest/download/docker-proxy-linux-amd64
+chmod +x docker-proxy-linux-amd64
+./docker-proxy-linux-amd64
+
+# macOS Apple Silicon
+wget https://github.com/hypolas/docker-proxy/releases/latest/download/docker-proxy-darwin-arm64
+chmod +x docker-proxy-darwin-arm64
+./docker-proxy-darwin-arm64
+
+# Windows
+# Download from: https://github.com/hypolas/docker-proxy/releases/latest
+```
+
+**Available platforms:**
+- Linux: amd64, arm64, armv7
+- macOS: amd64 (Intel), arm64 (Apple Silicon)
+- Windows: amd64
+
+**Verify checksums:**
+```bash
+wget https://github.com/hypolas/docker-proxy/releases/latest/download/checksums.txt
+sha256sum -c checksums.txt --ignore-missing
+```
+
+### Option 3: Build from Source
 
 ```bash
 # Clone repository
