@@ -15,7 +15,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o docker-proxy ./cmd/docker-proxy
 
 # Final stage
-FROM alpine:latest as final
+FROM alpine:3.18.12
 
 RUN apk --no-cache add ca-certificates sudo su-exec util-linux
 
@@ -35,9 +35,6 @@ COPY entrypoint.sh /entrypoint.sh
 
 # Expose port
 EXPOSE 2375
-
-# Copy sudoers file
-RUN cp -r /etc /etc_source
 
 # Run the proxy by default via entrypoint script
 # Stay as root to allow setpriv to work in entrypoint
