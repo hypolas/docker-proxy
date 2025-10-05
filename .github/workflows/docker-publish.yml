@@ -91,14 +91,14 @@ jobs:
             BUILD_DATE=${{ github.event.head_commit.timestamp }}
             VCS_REF=${{ github.sha }}
 
-      - name: Update Docker Hub description
-        uses: peter-evans/dockerhub-description@v5
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: ${{ env.DOCKER_IMAGE }}
-          short-description: "Secure Docker Socket Proxy with advanced filtering for CI/CD"
-          readme-filepath: ./README.md
+      # - name: Update Docker Hub description
+      #   uses: peter-evans/dockerhub-description@v5
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+      #     repository: ${{ env.DOCKER_IMAGE }}
+      #     short-description: "Secure Docker Socket Proxy with advanced filtering for CI/CD"
+      #     readme-filepath: ./README.md
 
       - name: Generate release summary
         run: |

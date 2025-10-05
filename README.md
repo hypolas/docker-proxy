@@ -265,12 +265,13 @@ graph TB
 
     start((Start))
     start --> agent[CI/CD agent]
-    agent -->|Docker API calls| proxySock
-    proxy <-- binds --> proxySock
-    proxy -->|validates & forwards| dockerSock
-    dockerSock -->|native API| engine
-    engine -->|responses| proxy
-    proxy -->|responses| agent
+    agent -->|"(1) Docker Proxy API calls"| proxySock
+    proxy <-- "(2) binds" --> proxySock
+    proxy -->|"(3 - OK ) validates & forwards"| dockerSock
+    proxy -->|"(3 - KO ) validatio failed"| agent
+    dockerSock -->|"(4) native API"| engine
+    engine -->|"(5) responses"| proxy
+    proxy -->|"(6) responses"| agent
 ```
 
 ### 🔧 CI/CD Integration
