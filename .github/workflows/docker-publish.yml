@@ -3,20 +3,68 @@ name: Build and Publish Docker Image
 on:
   push:
     tags:
-      - 'v*.*.*'      # Trigger on version tags (v1.0.0, v2.1.3, etc.)
-      - 'v*.*.*-*'    # Also support pre-release tags (v1.0.0-beta, v1.0.0-rc1, etc.)
+      - v*.*.*      # Trigger on version tags (v1.0.0, v2.1.3, etc.)
+      - v*.*.*-*    # Also support pre-release tags (v1.0.0-beta, v1.0.0-rc1, etc.)
 
 env:
   DOCKER_IMAGE: hypolas/proxy-docker
   PLATFORMS: linux/amd64,linux/arm64 # ,linux/arm/v7
 
 jobs:
-  build-and-push:
+  # Job 1: Tests and Quality Checks
+  test:
+    name: Tests & Quality
     runs-on: ubuntu-latest
 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      - name: Run tests
+        run: |
+          echo "🧪 Running Go tests..."
+          go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+      - name: Check test coverage
+        run: |
+          echo "📊 Test Coverage Report:"
+          go tool cover -func=coverage.txt
+          COVERAGE=$(go tool cover -func=coverage.txt | grep total | awk '{print $3}' | sed 's/%//')
+          echo "Total coverage: ${COVERAGE}%"
+
+      - name: Run linter (golangci-lint)
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: latest
+          args: --timeout=5m --out-format=colored-line-number
+
+      - name: Build test binary
+        run: |
+          echo "🔨 Building test binary to verify compilation..."
+          go build -v -o /tmp/docker-proxy-test ./cmd/docker-proxy
+          echo "✅ Build successful"
+
+  # Job 2: Build and Push Docker Image
+  docker:
+    name: Docker Build & Push
+    runs-on: ubuntu-latest
+    needs: test
+
     permissions:
-      contents: write    # Required for creating GitHub Releases
-      packages: write    # Required for publishing to GitHub Container Registry (if needed)
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout code
@@ -35,50 +83,6 @@ jobs:
           echo "Git ref: ${{ github.ref }}"
           echo "Git ref name: ${{ github.ref_name }}"
           echo "Git ref type: ${{ github.ref_type }}"
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: 'go.mod'
-          cache: true
-
-      - name: Download dependencies
-        run: go mod download
-
-      - name: Verify dependencies
-        run: go mod verify
-
-      - name: Run tests
-        run: |
-          echo "🧪 Running Go tests..."
-          go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
-
-      - name: Check test coverage
-        run: |
-          echo "📊 Test Coverage Report:"
-          go tool cover -func=coverage.txt
-
-          # Calculate total coverage
-          COVERAGE=$(go tool cover -func=coverage.txt | grep total | awk '{print $3}' | sed 's/%//')
-          echo "Total coverage: ${COVERAGE}%"
-
-          # Optional: Fail if coverage is too low (disabled by default)
-          # if (( $(echo "$COVERAGE < 50" | bc -l) )); then
-          #   echo "❌ Coverage is below 50%"
-          #   exit 1
-          # fi
-
-      - name: Run linter (golangci-lint)
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: latest
-          args: --timeout=5m --out-format=colored-line-number
-
-      - name: Build test binary
-        run: |
-          echo "🔨 Building test binary to verify compilation..."
-          go build -v -o /tmp/docker-proxy-test ./cmd/docker-proxy
-          echo "✅ Build successful"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -135,14 +139,36 @@ jobs:
             BUILD_DATE=${{ github.event.head_commit.timestamp }}
             VCS_REF=${{ github.sha }}
 
-      # - name: Update Docker Hub description
-      #   uses: peter-evans/dockerhub-description@v5
-      #   with:
-      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
-      #     repository: ${{ env.DOCKER_IMAGE }}
-      #     short-description: "Secure Docker Socket Proxy with advanced filtering for CI/CD"
-      #     readme-filepath: ./README.md
+      - name: Generate summary
+        run: |
+          echo "## 🐳 Docker Image Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${{ env.DOCKER_IMAGE }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Git Tag:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Docker Tags Created:**" >> $GITHUB_STEP_SUMMARY
+          echo "> Note: The 'v' prefix is automatically removed from Docker tags" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Platforms:** \`${{ env.PLATFORMS }}\`" >> $GITHUB_STEP_SUMMARY
+
+  # Job 3: Build Binaries for Multiple Platforms
+  binaries:
+    name: Build Binaries
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
 
       - name: Build binaries for multiple platforms
         run: |
@@ -173,6 +199,32 @@ jobs:
 
           # List built files
           ls -lh dist/
+
+      - name: Upload binaries as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries
+          path: dist/
+          retention-days: 7
+
+  # Job 4: Create GitHub Release
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [docker, binaries]
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: binaries
+          path: dist/
 
       - name: Generate release notes
         id: release_notes
@@ -259,10 +311,8 @@ jobs:
           **Full Changelog**: https://github.com/hypolas/docker-proxy/commits/${{ github.ref_name }}
           EOF
 
-          echo "notes_file=release_notes.md" >> $GITHUB_OUTPUT
-
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           body_path: release_notes.md
           draft: false
@@ -279,21 +329,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate release summary
+      - name: Generate summary
         run: |
-          echo "## 🐳 Docker Image Published" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Image:** \`${{ env.DOCKER_IMAGE }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Git Tag:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Docker Tags Created:**" >> $GITHUB_STEP_SUMMARY
-          echo "> Note: The 'v' prefix is automatically removed from Docker tags" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Platforms:** \`${{ env.PLATFORMS }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
           echo "## 📦 GitHub Release Created" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Release URL:** https://github.com/hypolas/docker-proxy/releases/tag/${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
@@ -303,11 +340,8 @@ jobs:
           echo "- macOS: amd64, arm64" >> $GITHUB_STEP_SUMMARY
           echo "- Windows: amd64" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Pull command:**" >> $GITHUB_STEP_SUMMARY
+          echo "**Download:**" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "# Docker" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ${{ env.DOCKER_IMAGE }}:${GITHUB_REF_NAME#v}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "# Or download binary from:" >> $GITHUB_STEP_SUMMARY
+          echo "# Binary download from:" >> $GITHUB_STEP_SUMMARY
           echo "# https://github.com/hypolas/docker-proxy/releases/tag/${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

@@ -51,7 +51,7 @@ issues:
         - gosec
 
     # Exclude known issues
-    - text: "weak cryptographic primitive"
+    - text: weak cryptographic primitive
       linters:
         - gosec
 
