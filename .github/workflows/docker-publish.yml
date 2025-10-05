@@ -15,8 +15,8 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
-      packages: write
+      contents: write    # Required for creating GitHub Releases
+      packages: write    # Required for publishing to GitHub Container Registry (if needed)
 
     steps:
       - name: Checkout code
