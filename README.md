@@ -294,8 +294,10 @@ services:
       DKRPRX__CONTAINERS__ALLOWED_IMAGES: "^registry.company.com/.*"
       # Block :latest
       DKRPRX__IMAGES__DENIED_TAGS: "^latest$"
+      LISTEN_SOCKET: unix:///tmp/docker-proxy.sock
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /tmp:/tmp  # ⚠️ Required for LISTEN_SOCKET unix:///tmp/docker-proxy.sock
 
 jobs:
   build:
@@ -304,7 +306,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build Docker image
         env:
-          DOCKER_HOST: tcp://docker-proxy:2375
+          DOCKER_HOST: /tmp/docker-proxy.sock
         run: docker build -t registry.company.com/app:${{ github.sha }} .
 ```
 
@@ -313,17 +315,20 @@ jobs:
 ```yaml
 # .gitlab-ci.yml
 variables:
-  DOCKER_HOST: tcp://docker-proxy:2375
+  DOCKER_HOST: unix:///tmp/docker-proxy.sock
 
-services:
   - name: hypolas/proxy-docker:latest
     alias: docker-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /tmp:/tmp  # ⚠️ Required for LISTEN_SOCKET
     variables:
       CONTAINERS: "1"
       IMAGES: "1"
       BUILD: "1"
       POST: "1"
       DKRPRX__CONTAINERS__ALLOWED_IMAGES: "^registry.company.com/.*"
+      LISTEN_SOCKET: unix:///tmp/docker-proxy.sock
 
 build:
   script:

@@ -69,16 +69,16 @@ docker run -d \
 services:
   docker:
     image: your-registry/docker-proxy:latest
-    ports:
-      - 2375:2375
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /tmp:/tmp
     env:
       BUILD: 1
       IMAGES: 1
       CONTAINERS: 1
       POST: 1
       DELETE: 1
+      LISTEN_SOCKET: unix:///tmp/docker-proxy.sock
 ```
 
 ## 🎯 Use Case 3: Advanced Filtering (Production)
@@ -94,9 +94,8 @@ services:
     image: your-registry/docker-proxy:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /tmp:/tmp
       - ./filters.json:/etc/docker-proxy/filters.json:ro
-    ports:
-      - "2375:2375"
     environment:
       # Basic access
       CONTAINERS: 1
@@ -107,6 +106,7 @@ services:
 
       # Advanced filters
       FILTERS_CONFIG: /etc/docker-proxy/filters.json
+      LISTEN_SOCKET: unix:///tmp/docker-proxy.sock
 
       # Self-protection
       PROXY_CONTAINER_NAME: docker-proxy
@@ -168,7 +168,8 @@ For hosting providers or multi-tenant platforms.
 docker run -d \
   --name docker-proxy-tenant1 \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  -p 2375:2375 \
+  -v /tmp:/tmp \
+  -e LISTEN_SOCKET=unix:///tmp/docker-proxy.sock \
   -e CONTAINERS=1 \
   -e IMAGES=1 \
   -e NETWORKS=1 \
@@ -194,8 +195,8 @@ For local development or sidecar patterns.
 docker run -d \
   --name docker-proxy \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
-  -v /tmp/docker-proxy:/tmp/docker-proxy \
-  -e LISTEN_SOCKET=/tmp/docker-proxy/docker.sock \
+  -v /tmp:/tmp \
+  -e LISTEN_SOCKET=unix:///tmp/docker-proxy.sock \
   -e SOCKET_PERMS=0666 \
   -e CONTAINERS=1 \
   -e IMAGES=1 \
@@ -205,7 +206,7 @@ docker run -d \
 
 **Usage**:
 ```bash
-export DOCKER_HOST=unix:///tmp/docker-proxy/docker.sock
+export DOCKER_HOST=unix:///tmp/docker-proxy.sock
 docker ps
 ```
 
