@@ -266,18 +266,18 @@ graph LR
     end
 
     subgraph "Proxy Host"
-        B[Docker Proxy (LISTEN_SOCKET=/tmp/docker-proxy.sock)]
-        C[(Unix Socket /tmp/docker-proxy.sock)]
+        B[Docker Proxy<br>LISTEN_SOCKET=/tmp/docker-proxy.sock]
+        C[(Unix Socket<br>/tmp/docker-proxy.sock)]
     end
 
     subgraph "Docker Host"
-        D[(Docker Socket /var/run/docker.sock)]
+        D[(Docker Socket<br>/var/run/docker.sock)]
         E[Docker Engine]
     end
 
     A -- "DOCKER_HOST=unix:///tmp/docker-proxy.sock" --> B
     B -- binds --> C
-    C -- "proxy traffic" --> D
+    C -- proxy traffic --> D
     D -- native socket --> E
 ```
 
