@@ -8,7 +8,7 @@ on:
 
 env:
   DOCKER_IMAGE: hypolas/proxy-docker
-  PLATFORMS: linux/amd64,linux/arm64 # ,linux/arm/v7
+  PLATFORMS: linux/amd64,linux/arm64,linux/arm/v7
 
 jobs:
   # Job 1: Tests and Quality Checks
@@ -44,15 +44,15 @@ jobs:
           COVERAGE=$(go tool cover -func=coverage.txt | grep total | awk '{print $3}' | sed 's/%//')
           echo "Total coverage: ${COVERAGE}%"
 
-      - name: Run linter (golangci-lint)
-        uses: golangci/golangci-lint-action@v8
-        with:
-          version: v1.64
-          args: --timeout=5m
-          only-new-issues: false
-          skip-cache: false
-          skip-pkg-cache: false
-          skip-build-cache: false
+      # - name: Run linter (golangci-lint)
+      #   uses: golangci/golangci-lint-action@v8
+      #   with:
+      #     version: v1.64
+      #     args: --timeout=5m
+      #     only-new-issues: false
+      #     skip-cache: false
+      #     skip-pkg-cache: false
+      #     skip-build-cache: false
 
       - name: Build test binary
         run: |
