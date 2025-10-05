@@ -649,7 +649,7 @@ docker ps
 
 ## 🔧 CI/CD Integration
 
-This proxy is **specifically designed to secure CI/CD pipelines**. See [CICD_EXAMPLES.md](CICD_EXAMPLES.md) for detailed examples:
+This proxy is **specifically designed to secure CI/CD pipelines**. See [CICD_EXAMPLES.md](docs/CICD_EXAMPLES.md) for detailed examples:
 
 - **GitHub Actions** - Secure Docker in workflows
 - **GitLab CI** - Granular access control with services
@@ -666,7 +666,7 @@ This proxy is **specifically designed to secure CI/CD pipelines**. See [CICD_EXA
 
 ## 🔐 Security
 
-See [SECURITY.md](SECURITY.md) for:
+See [SECURITY.md](docs/SECURITY.md) for:
 - Implemented default protections
 - Blocked attack vectors
 - Production security checklist
