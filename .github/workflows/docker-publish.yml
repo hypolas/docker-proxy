@@ -92,20 +92,13 @@ jobs:
             VCS_REF=${{ github.sha }}
 
       - name: Update Docker Hub description
-        if: ${{ secrets.DOCKERHUB_DESCRIPTION_TOKEN }}
-        uses: peter-evans/dockerhub-description@v4
+        uses: peter-evans/dockerhub-description@v5
         with:
-          username: ${{ secrets.DOCKERHUB_DESCRIPTION_USERNAME != '' && secrets.DOCKERHUB_DESCRIPTION_USERNAME || secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_DESCRIPTION_TOKEN }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: ${{ env.DOCKER_IMAGE }}
           short-description: "Secure Docker Socket Proxy with advanced filtering for CI/CD"
           readme-filepath: ./README.md
-
-      - name: Skip Docker Hub description update
-        if: ${{ !secrets.DOCKERHUB_DESCRIPTION_TOKEN }}
-        run: |
-          echo "Skipping Docker Hub description update."
-          echo "Provide DOCKERHUB_DESCRIPTION_TOKEN (admin access) to enable this step."
 
       - name: Generate release summary
         run: |
