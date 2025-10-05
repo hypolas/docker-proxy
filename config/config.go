@@ -28,25 +28,25 @@ type AccessRules struct {
 	Version bool
 
 	// API endpoints
-	Auth bool
-	Build      bool
-	Commit     bool
-	Configs    bool
-	Containers bool
+	Auth         bool
+	Build        bool
+	Commit       bool
+	Configs      bool
+	Containers   bool
 	Distribution bool
-	Exec       bool
-	Images     bool
-	Info       bool
-	Networks   bool
-	Nodes      bool
-	Plugins    bool
-	Secrets    bool
-	Services   bool
-	Session    bool
-	Swarm      bool
-	System     bool
-	Tasks      bool
-	Volumes    bool
+	Exec         bool
+	Images       bool
+	Info         bool
+	Networks     bool
+	Nodes        bool
+	Plugins      bool
+	Secrets      bool
+	Services     bool
+	Session      bool
+	Swarm        bool
+	System       bool
+	Tasks        bool
+	Volumes      bool
 
 	// HTTP Methods
 	Post   bool
