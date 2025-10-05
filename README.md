@@ -260,9 +260,9 @@ curl --unix-socket /tmp/docker-proxy.sock http://localhost/v1.41/containers/json
 > ℹ️ `LISTEN_SOCKET` prend toujours le pas sur `LISTEN_ADDR`. Pensez à ajuster `SOCKET_PERMS` si le socket doit être partagé avec d’autres utilisateurs (ex. `export SOCKET_PERMS=0660`).
 
 ```mermaid
-graph LR
+graph LR;
     subgraph "CI/CD Runner"
-        A[Pipeline Step (docker build/push)]
+        A["Pipeline (docker build/push)"];
     end
 
     subgraph "Proxy Host"
