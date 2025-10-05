@@ -259,10 +259,15 @@ curl --unix-socket /tmp/docker-proxy.sock http://localhost/v1.41/containers/json
 
 > ℹ️ `LISTEN_SOCKET` prend toujours le pas sur `LISTEN_ADDR`. Pensez à ajuster `SOCKET_PERMS` si le socket doit être partagé avec d’autres utilisateurs (ex. `export SOCKET_PERMS=0660`).
 
+# Architecture
+
+## Runner direct on host
+
 ```mermaid
-graph LR;
+graph TB;
     subgraph "CI/CD Runner"
         A["Pipeline (docker build/push)"];
+
     end
 
     subgraph "Proxy Host"
@@ -279,6 +284,49 @@ graph LR;
     B -- binds --> C
     C -- proxy traffic --> D
     D -- native socket --> E
+```
+
+## With a Docker agent:
+
+Proxy comfiguration sample:
+
+```yaml
+services:
+  docker-proxy:
+    build: .
+    image: hypolas-docker-proxy:latest
+    container_name: docker-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      # Configuration de base
+      - LISTEN_SOCKET=/tmp/docker_proxy.sock
+      - DOCKER_SOCKET=unix:///var/run/doc
+```
+
+```mermaid
+graph TB;
+    subgraph "Agent in Docker"
+        AgentGetTask["Get tasks from pipeline"];
+    end
+
+    subgraph "Docker Proxy"
+        ProgrammeProxy[Programme];
+        ProxySocket[[Unix Socket<br>/tmp/docker-proxy.sock]];
+        DockerSocket[[Unix Socket<br>/var/run/docker.sock]];
+    end
+
+    subgraph "Docker Engine"
+        ProgrammeDocker[Docker];
+        ProxySocket[[Unix Socket<br>/tmp/docker-proxy.sock]];
+        DockerSocket[[Unix Socket<br>/var/run/docker.sock]];
+    end
+
+    AgentGetTask -- "Send to proxy socket" --> ProxySocket
+    ProgrammeProxy -- "Listen" --> ProxySocket
+    ProgrammeProxy -- "Filter to" --> DockerSocket
+    ProgrammeDocker -- "Listen" --> DockerSocket
+  
 ```
 
 ### 🔧 Intégration CI/CD
