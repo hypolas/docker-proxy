@@ -36,6 +36,50 @@ jobs:
           echo "Git ref name: ${{ github.ref_name }}"
           echo "Git ref type: ${{ github.ref_type }}"
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      - name: Run tests
+        run: |
+          echo "🧪 Running Go tests..."
+          go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+      - name: Check test coverage
+        run: |
+          echo "📊 Test Coverage Report:"
+          go tool cover -func=coverage.txt
+
+          # Calculate total coverage
+          COVERAGE=$(go tool cover -func=coverage.txt | grep total | awk '{print $3}' | sed 's/%//')
+          echo "Total coverage: ${COVERAGE}%"
+
+          # Optional: Fail if coverage is too low (disabled by default)
+          # if (( $(echo "$COVERAGE < 50" | bc -l) )); then
+          #   echo "❌ Coverage is below 50%"
+          #   exit 1
+          # fi
+
+      - name: Run linter (golangci-lint)
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --timeout=5m
+
+      - name: Build test binary
+        run: |
+          echo "🔨 Building test binary to verify compilation..."
+          go build -v -o /tmp/docker-proxy-test ./cmd/docker-proxy
+          echo "✅ Build successful"
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -172,11 +216,14 @@ jobs:
 
           ```bash
           # Linux amd64 example
+
+          export DOCKER_HOST=unix:///var/run/docker.sock
+          export LISTEN_SOCKET=unix:///tmp/docker_proxy.sock
+          export CONTAINERS=1
+          export IMAGES=1
+
           chmod +x docker-proxy-linux-amd64
-          ./docker-proxy-linux-amd64 \
-            DOCKER_HOST=unix:///var/run/docker.sock \
-            LISTEN_SOCKET=unix:///tmp/docker-proxy.sock \
-            CONTAINERS=1 IMAGES=1 
+          ./docker-proxy-linux-amd64
           ```
 
           ### 🏗️ Supported Platforms

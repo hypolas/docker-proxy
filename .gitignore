@@ -5,11 +5,18 @@
 *.so
 *.dylib
 
+# Build outputs
+/cmd/*/docker-proxy
+/dist/
+docker-proxy
+docker-proxy-*
+
 # Test binary
 *.test
 
 # Output of the go coverage tool
 *.out
+coverage.txt
 
 # Dependency directories
 vendor/
