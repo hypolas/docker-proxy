@@ -267,7 +267,7 @@ func TestLoad(t *testing.T) {
 		defer cleanEnv()
 
 		os.Setenv("LISTEN_ADDR", ":3000")
-		os.Setenv("LISTEN_SOCKET", "unix:///tmp/docker-proxy.sock")
+		os.Setenv("LISTEN_SOCKET", "unix:///tmp/dockershield.sock")
 		os.Setenv("DOCKER_SOCKET", "tcp://localhost:2376")
 		os.Setenv("LOG_LEVEL", "debug")
 		os.Setenv("API_VERSION", "1.41")
@@ -277,8 +277,8 @@ func TestLoad(t *testing.T) {
 		if cfg.ListenAddr != ":3000" {
 			t.Errorf("Expected ListenAddr ':3000', got '%s'", cfg.ListenAddr)
 		}
-		if cfg.ListenSocket != "unix:///tmp/docker-proxy.sock" {
-			t.Errorf("Expected ListenSocket 'unix:///tmp/docker-proxy.sock', got '%s'", cfg.ListenSocket)
+		if cfg.ListenSocket != "unix:///tmp/dockershield.sock" {
+			t.Errorf("Expected ListenSocket 'unix:///tmp/dockershield.sock', got '%s'", cfg.ListenSocket)
 		}
 		if cfg.DockerSocket != "tcp://localhost:2376" {
 			t.Errorf("Expected DockerSocket 'tcp://localhost:2376', got '%s'", cfg.DockerSocket)

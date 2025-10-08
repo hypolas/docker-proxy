@@ -23,7 +23,7 @@ docker run -v /var/run/docker.sock:/var/run/docker.sock alpine
 
 ### 2. Proxy Container Self-Protection
 
-**The docker-proxy container protects itself** against any manipulation via the API it exposes.
+**The dockershield container protects itself** against any manipulation via the API it exposes.
 
 Automatic protection:
 - ❌ Cannot stop the proxy container
@@ -35,9 +35,9 @@ Automatic protection:
 **Example of blocked attempt:**
 ```bash
 # Attempt to stop the proxy via the API it exposes
-docker stop docker-proxy
+docker stop dockershield
 # ❌ Denied: "Container operation denied by advanced filter"
-# Reason: "container name is denied: docker-proxy"
+# Reason: "container name is denied: dockershield"
 ```
 
 ### 3. Proxy Network Protection
@@ -46,9 +46,9 @@ If the proxy uses a dedicated network, it is also protected.
 
 **Example:**
 ```bash
-docker network rm docker-proxy
+docker network rm dockershield
 # ❌ Denied: "Network operation denied by advanced filter"
-# Reason: "network name is denied: docker-proxy"
+# Reason: "network name is denied: dockershield"
 ```
 
 ## ⚙️ Protection Configuration
@@ -56,28 +56,28 @@ docker network rm docker-proxy
 ### Environment Variables
 
 ```bash
-# Name of container to protect (default: docker-proxy)
-export PROXY_CONTAINER_NAME="docker-proxy"
+# Name of container to protect (default: dockershield)
+export PROXY_CONTAINER_NAME="dockershield"
 
 # Name of network to protect (optional)
-export PROXY_NETWORK_NAME="docker-proxy-network"
+export PROXY_NETWORK_NAME="dockershield-network"
 ```
 
 ### Docker Compose
 
 ```yaml
 services:
-  docker-proxy:
-    container_name: docker-proxy
+  dockershield:
+    container_name: dockershield
     environment:
-      - PROXY_CONTAINER_NAME=docker-proxy
-      - PROXY_NETWORK_NAME=docker-proxy
+      - PROXY_CONTAINER_NAME=dockershield
+      - PROXY_NETWORK_NAME=dockershield
     networks:
-      - docker-proxy
+      - dockershield
 
 networks:
-  docker-proxy:
-    name: docker-proxy
+  dockershield:
+    name: dockershield
 ```
 
 ## 🔓 Disabling Protections
@@ -132,7 +132,7 @@ docker run -v /var/run/docker.sock:/var/run/docker.sock \
 **Attack:**
 ```bash
 # Attacker tries to stop proxy to bypass restrictions
-docker stop docker-proxy
+docker stop dockershield
 docker run -v /var/run/docker.sock:/var/run/docker.sock alpine
 ```
 
@@ -172,8 +172,8 @@ export DKRPRX__CONTAINERS__DENY_PRIVILEGED="true"
 
 - [ ] **Docker socket read-only**: `-v /var/run/docker.sock:/var/run/docker.sock:ro`
 - [ ] **Default protections enabled**: Do not set `DKRPRX__DISABLE_DEFAULTS`
-- [ ] **Container name configured**: `PROXY_CONTAINER_NAME=docker-proxy`
-- [ ] **Dedicated network**: `PROXY_NETWORK_NAME=docker-proxy`
+- [ ] **Container name configured**: `PROXY_CONTAINER_NAME=dockershield`
+- [ ] **Dedicated network**: `PROXY_NETWORK_NAME=dockershield`
 - [ ] **Read-only mode**: `POST=0`, `DELETE=0`, `PUT=0`
 - [ ] **Minimal endpoints**: Only enable necessary endpoints
 - [ ] **No public exposure**: NEVER expose on the Internet

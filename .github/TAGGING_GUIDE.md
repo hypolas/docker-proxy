@@ -233,7 +233,7 @@ docker images hypolas/proxy-docker
 
 ```bash
 # View workflow runs
-https://github.com/hypolas/docker-proxy/actions
+https://github.com/hypolas/dockershield/actions
 
 # Or via CLI
 gh run list --workflow=docker-publish.yml

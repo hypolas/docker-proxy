@@ -10,10 +10,10 @@ import (
 	"syscall"
 	"time"
 
-	"docker-proxy/config"
-	"docker-proxy/internal/middleware"
-	"docker-proxy/internal/proxy"
-	"docker-proxy/pkg/rules"
+	"dockershield/config"
+	"dockershield/internal/middleware"
+	"dockershield/internal/proxy"
+	"dockershield/pkg/rules"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"

@@ -2,7 +2,7 @@
 # Script de test pour démontrer les conflits de configuration
 set -e
 
-echo "🧪 Test des Conflits de Configuration - docker-proxy"
+echo "🧪 Test des Conflits de Configuration - dockershield"
 echo "======================================================"
 echo ""
 
@@ -124,7 +124,7 @@ echo ""
 echo "Résultat:"
 echo "  Containers:"
 echo "    - denied_images: [malicious/*]        (de ENV)"
-echo "    - denied_names:  [^docker-proxy$]     (de DÉFAUTS)"
+echo "    - denied_names:  [^dockershield$]     (de DÉFAUTS)"
 echo "  Volumes:"
 echo "    - denied_paths: [/var/run/docker.sock] (de DÉFAUTS)"
 echo ""
@@ -156,7 +156,7 @@ echo "    - Les défauts (/var/run/docker.sock) sont PERDUS !"
 echo ""
 echo "  Containers:"
 echo "    - allowed_images: [nginx:*, redis:*]  (de JSON)"
-echo "    - Les défauts (^docker-proxy$) sont PERDUS !"
+echo "    - Les défauts (^dockershield$) sont PERDUS !"
 echo ""
 warning "En définissant une section dans JSON, vous perdez les défauts de cette section !"
 

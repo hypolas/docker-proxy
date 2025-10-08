@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"docker-proxy/config"
+	"dockershield/config"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-resty/resty/v2"

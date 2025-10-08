@@ -1,4 +1,4 @@
-module docker-proxy
+module dockershield
 
 go 1.24.0
 

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"docker-proxy/pkg/filters"
+	"dockershield/pkg/filters"
 )
 
 // Config holds the application configuration

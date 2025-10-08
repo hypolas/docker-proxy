@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"docker-proxy/pkg/filters"
+	"dockershield/pkg/filters"
 )
 
 const envPrefix = "DKRPRX__"

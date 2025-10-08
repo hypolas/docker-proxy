@@ -12,12 +12,14 @@ RUN go mod download
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o docker-proxy ./cmd/docker-proxy
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o dockershield ./cmd/dockershield
 
 # Final stage
 FROM alpine:3.18.12
 
-RUN apk --no-cache add ca-certificates sudo su-exec util-linux
+
+RUN apk --no-cache add ca-certificates sudo su-exec util-linux && \
+    apk del flock linux-pam
 
 # create user dkrproxy and add to sudoers and set password ad add to group sudo
 RUN addgroup -S dkrproxy && \
@@ -28,7 +30,7 @@ RUN addgroup -S dkrproxy && \
 WORKDIR /app/
 
 # Copy binary from builder
-COPY --from=builder /app/docker-proxy .
+COPY --from=builder /app/dockershield .
 
 # Copy entrypoint wrapper
 COPY entrypoint.sh /entrypoint.sh
@@ -39,4 +41,4 @@ EXPOSE 2375
 # Run the proxy by default via entrypoint script
 # Stay as root to allow setpriv to work in entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["docker-proxy"]
+CMD ["dockershield"]

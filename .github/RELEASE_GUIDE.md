@@ -35,12 +35,12 @@ hypolas/proxy-docker:latest
 ### Binary Releases (Published to GitHub Releases)
 
 **Platforms:**
-- `docker-proxy-linux-amd64` - Linux x86_64
-- `docker-proxy-linux-arm64` - Linux ARM 64-bit
-- `docker-proxy-linux-armv7` - Linux ARM 32-bit (v7)
-- `docker-proxy-darwin-amd64` - macOS Intel
-- `docker-proxy-darwin-arm64` - macOS Apple Silicon (M1/M2/M3)
-- `docker-proxy-windows-amd64.exe` - Windows x86_64
+- `dockershield-linux-amd64` - Linux x86_64
+- `dockershield-linux-arm64` - Linux ARM 64-bit
+- `dockershield-linux-armv7` - Linux ARM 32-bit (v7)
+- `dockershield-darwin-amd64` - macOS Intel
+- `dockershield-darwin-arm64` - macOS Apple Silicon (M1/M2/M3)
+- `dockershield-windows-amd64.exe` - Windows x86_64
 - `checksums.txt` - SHA256 checksums for all binaries
 
 ## 🎯 Creating a Release
@@ -56,8 +56,8 @@ git pull origin main
 go test ./...
 
 # Build locally to verify
-go build -o docker-proxy ./cmd/docker-proxy
-./docker-proxy --version
+go build -o dockershield ./cmd/dockershield
+./dockershield --version
 ```
 
 ### Step 2: Create and Push Tag
@@ -97,7 +97,7 @@ gh run list --workflow=docker-publish.yml
 gh run watch
 
 # Or view in browser
-https://github.com/hypolas/docker-proxy/actions
+https://github.com/hypolas/dockershield/actions
 ```
 
 ### Step 4: Verify the Release
@@ -113,15 +113,15 @@ docker run --rm hypolas/proxy-docker:1.0.0 --version
 **GitHub Release:**
 ```bash
 # View in browser
-https://github.com/hypolas/docker-proxy/releases/tag/v1.0.0
+https://github.com/hypolas/dockershield/releases/tag/v1.0.0
 
 # Or via CLI
 gh release view v1.0.0
 
 # Download binary
-gh release download v1.0.0 -p "docker-proxy-linux-amd64"
-chmod +x docker-proxy-linux-amd64
-./docker-proxy-linux-amd64 --version
+gh release download v1.0.0 -p "dockershield-linux-amd64"
+chmod +x dockershield-linux-amd64
+./dockershield-linux-amd64 --version
 ```
 
 ## 📝 Release Types
@@ -180,9 +180,9 @@ var (
 
 Users can check version:
 ```bash
-./docker-proxy --version
+./dockershield --version
 # Output:
-# docker-proxy v1.0.0
+# dockershield v1.0.0
 # Built: 2025-01-10T12:34:56Z
 # Commit: a1b2c3d
 ```
@@ -192,13 +192,13 @@ Users can check version:
 SHA256 checksums are automatically generated:
 ```bash
 # Download and verify
-wget https://github.com/hypolas/docker-proxy/releases/download/v1.0.0/docker-proxy-linux-amd64
-wget https://github.com/hypolas/docker-proxy/releases/download/v1.0.0/checksums.txt
+wget https://github.com/hypolas/dockershield/releases/download/v1.0.0/dockershield-linux-amd64
+wget https://github.com/hypolas/dockershield/releases/download/v1.0.0/checksums.txt
 
 # Verify
 sha256sum -c checksums.txt --ignore-missing
 # Should output:
-# docker-proxy-linux-amd64: OK
+# dockershield-linux-amd64: OK
 ```
 
 ## 📊 Release Notes
@@ -307,8 +307,8 @@ v2.0.0  # Breaking change (major)
 go test ./...
 
 # Build and test locally
-go build ./cmd/docker-proxy
-./docker-proxy
+go build ./cmd/dockershield
+./dockershield
 
 # Test Docker build
 docker build -t test .

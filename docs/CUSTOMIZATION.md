@@ -17,11 +17,11 @@ Replace these placeholders in `LICENSE`:
 
 **Lines to update:**
 - Line 68: `Email: [your-email@example.com]`
-- Line 69: `Web: https://github.com/[your-repo]/docker-proxy`
+- Line 69: `Web: https://github.com/[your-repo]/dockershield`
 - Line 157: `- GPL-3.0 compliance: [your-email@example.com]`
 - Line 158: `- Commercial licensing: [sales-email@example.com]`
 - Line 159: `- General inquiries: [support-email@example.com]`
-- Line 161: `Project Repository: https://github.com/[your-repo]/docker-proxy`
+- Line 161: `Project Repository: https://github.com/[your-repo]/dockershield`
 
 ### 2. LICENSE-COMMERCIAL File
 

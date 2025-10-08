@@ -5,4 +5,4 @@ export LISTEN_SOCKET=unix:///tmp/docker_proxy.sock
 export CONTAINERS=1
 export IMAGES=1
 
-go run ./cmd/docker-proxy
+go run ./cmd/dockershield

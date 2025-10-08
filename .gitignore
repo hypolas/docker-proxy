@@ -6,10 +6,10 @@
 *.dylib
 
 # Build outputs
-/cmd/*/docker-proxy
+/cmd/*/dockershield
 /dist/
-docker-proxy
-docker-proxy-*
+dockershield
+dockershield-*
 
 # Test binary
 *.test

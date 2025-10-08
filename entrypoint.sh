@@ -16,15 +16,15 @@ addgroup -g "$DOCKER_SOCK_GID" dockerhost 2>/dev/null || true
 # Add dkrproxy user to dockerhost group
 addgroup dkrproxy dockerhost 2>/dev/null || true
 
-# Default to docker-proxy when the first argument looks like an option
+# Default to dockershield when the first argument looks like an option
 if [ "${1#-}" != "$1" ]; then
-    set -- docker-proxy "$@"
+    set -- dockershield "$@"
 fi
 
-if [ "$1" = "docker-proxy" ]; then
+if [ "$1" = "dockershield" ]; then
     shift
     DOCKERHOST_GID=$(getent group dockerhost | cut -d: -f3)
-    exec setpriv --reuid=dkrproxy --regid=dkrproxy --groups=$DOCKERHOST_GID /app/docker-proxy "$@"
+    exec setpriv --reuid=dkrproxy --regid=dkrproxy --groups=$DOCKERHOST_GID /app/dockershield "$@"
 fi
 
 exec "$@"

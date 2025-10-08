@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"docker-proxy/config"
+	"dockershield/config"
 )
 
 // Matcher determines if a request is allowed based on access rules

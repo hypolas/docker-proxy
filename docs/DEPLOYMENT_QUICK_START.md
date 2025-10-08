@@ -1,6 +1,6 @@
 # 🚀 Quick Start Deployment Guide
 
-This guide helps you deploy docker-proxy quickly for different use cases.
+This guide helps you deploy dockershield quickly for different use cases.
 
 ## 📦 Prerequisites
 
@@ -14,7 +14,7 @@ Perfect for monitoring tools, dashboards, CI/CD pipelines that only need to read
 
 ```bash
 docker run -d \
-  --name docker-proxy \
+  --name dockershield \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -p 2375:2375 \
   -e CONTAINERS=1 \
@@ -44,7 +44,7 @@ For CI/CD pipelines that need to build images and manage containers.
 
 ```bash
 docker run -d \
-  --name docker-proxy \
+  --name dockershield \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -p 2375:2375 \
   -e BUILD=1 \
@@ -53,7 +53,7 @@ docker run -d \
   -e NETWORKS=1 \
   -e POST=1 \
   -e DELETE=1 \
-  -e PROXY_CONTAINER_NAME=docker-proxy \
+  -e PROXY_CONTAINER_NAME=dockershield \
   hypolas/proxy-docker:latest
 ```
 
@@ -68,7 +68,7 @@ docker run -d \
 ```yaml
 services:
   docker:
-    image: your-registry/docker-proxy:latest
+    image: your-registry/dockershield:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /tmp:/tmp
@@ -78,7 +78,7 @@ services:
       CONTAINERS: 1
       POST: 1
       DELETE: 1
-      LISTEN_SOCKET: unix:///tmp/docker-proxy.sock
+      LISTEN_SOCKET: unix:///tmp/dockershield.sock
 ```
 
 ## 🎯 Use Case 3: Advanced Filtering (Production)
@@ -90,12 +90,12 @@ For production environments with strict security requirements.
 version: '3.8'
 
 services:
-  docker-proxy:
-    image: your-registry/docker-proxy:latest
+  dockershield:
+    image: your-registry/dockershield:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /tmp:/tmp
-      - ./filters.json:/etc/docker-proxy/filters.json:ro
+      - ./filters.json:/etc/dockershield/filters.json:ro
     environment:
       # Basic access
       CONTAINERS: 1
@@ -105,11 +105,11 @@ services:
       DELETE: 1
 
       # Advanced filters
-      FILTERS_CONFIG: /etc/docker-proxy/filters.json
-      LISTEN_SOCKET: unix:///tmp/docker-proxy.sock
+      FILTERS_CONFIG: /etc/dockershield/filters.json
+      LISTEN_SOCKET: unix:///tmp/dockershield.sock
 
       # Self-protection
-      PROXY_CONTAINER_NAME: docker-proxy
+      PROXY_CONTAINER_NAME: dockershield
       PROXY_NETWORK_NAME: proxy_network
 
       # Additional env-based filters
@@ -166,10 +166,10 @@ For hosting providers or multi-tenant platforms.
 
 ```bash
 docker run -d \
-  --name docker-proxy-tenant1 \
+  --name dockershield-tenant1 \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v /tmp:/tmp \
-  -e LISTEN_SOCKET=unix:///tmp/docker-proxy.sock \
+  -e LISTEN_SOCKET=unix:///tmp/dockershield.sock \
   -e CONTAINERS=1 \
   -e IMAGES=1 \
   -e NETWORKS=1 \
@@ -178,7 +178,7 @@ docker run -d \
   -e DKRPRX__CONTAINERS__ALLOWED_NAMES="^tenant1-.*" \
   -e DKRPRX__NETWORKS__ALLOWED_NAMES="^tenant1-.*" \
   -e DKRPRX__IMAGES__ALLOWED_REGISTRIES="registry.tenant1.com" \
-  -e PROXY_CONTAINER_NAME=docker-proxy-tenant1 \
+  -e PROXY_CONTAINER_NAME=dockershield-tenant1 \
   hypolas/proxy-docker:latest
 ```
 
@@ -193,10 +193,10 @@ For local development or sidecar patterns.
 
 ```bash
 docker run -d \
-  --name docker-proxy \
+  --name dockershield \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -v /tmp:/tmp \
-  -e LISTEN_SOCKET=unix:///tmp/docker-proxy.sock \
+  -e LISTEN_SOCKET=unix:///tmp/dockershield.sock \
   -e SOCKET_PERMS=0666 \
   -e CONTAINERS=1 \
   -e IMAGES=1 \
@@ -206,7 +206,7 @@ docker run -d \
 
 **Usage**:
 ```bash
-export DOCKER_HOST=unix:///tmp/docker-proxy.sock
+export DOCKER_HOST=unix:///tmp/dockershield.sock
 docker ps
 ```
 
@@ -240,7 +240,7 @@ docker ps
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `PROXY_CONTAINER_NAME` | `docker-proxy` | Name of proxy container (for self-protection) |
+| `PROXY_CONTAINER_NAME` | `dockershield` | Name of proxy container (for self-protection) |
 | `PROXY_NETWORK_NAME` | - | Name of proxy network (for protection) |
 | `DKRPRX__DISABLE_DEFAULTS` | `false` | Disable security defaults |
 
@@ -302,7 +302,7 @@ docker pull nginx:latest
 
 ### 4. Check Logs
 ```bash
-docker logs docker-proxy
+docker logs dockershield
 ```
 
 ## 🆘 Troubleshooting
@@ -332,7 +332,7 @@ docker logs docker-proxy
 
 **Debug**:
 ```bash
-docker logs docker-proxy | grep -i filter
+docker logs dockershield | grep -i filter
 ```
 
 ### Issue: Security defaults blocking legitimate operations
@@ -367,9 +367,9 @@ docker logs docker-proxy | grep -i filter
 
 ## 📞 Support
 
-- **Issues**: https://github.com/hypolas/docker-proxy/issues
+- **Issues**: https://github.com/hypolas/dockershield/issues
 - **Email**: nicolas.hypolite@gmail.com
-- **Documentation**: https://github.com/hypolas/docker-proxy
+- **Documentation**: https://github.com/hypolas/dockershield
 
 ---
 

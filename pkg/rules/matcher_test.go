@@ -3,7 +3,7 @@ package rules
 import (
 	"testing"
 
-	"docker-proxy/config"
+	"dockershield/config"
 )
 
 func TestNewMatcher(t *testing.T) {

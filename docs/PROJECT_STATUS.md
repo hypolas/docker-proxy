@@ -85,9 +85,9 @@ The following components have been implemented and are ready for testing:
 ## 📋 File Structure
 
 ```
-docker-proxy/
+dockershield/
 ├── cmd/
-│   └── docker-proxy/
+│   └── dockershield/
 │       └── main.go                  ✅ Main entry point
 ├── config/
 │   ├── config.go                    ✅ Configuration loader
@@ -216,7 +216,7 @@ For questions about:
 - **GPL-3.0 compliance**: nicolas.hypolite@gmail.com
 - **Commercial licensing**: nicolas.hypolite@gmail.com
 - **General inquiries**: nicolas.hypolite@gmail.com
-- **Issues**: https://github.com/hypolas/docker-proxy/issues
+- **Issues**: https://github.com/hypolas/dockershield/issues
 
 ## ✨ Acknowledgments
 

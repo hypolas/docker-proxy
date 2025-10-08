@@ -5,7 +5,7 @@ This document explains how to configure GitHub Actions to automatically publish 
 ## 📋 Prerequisites
 
 1. **Docker Hub account**: https://hub.docker.com
-2. **GitHub repository**: https://github.com/hypolas/docker-proxy
+2. **GitHub repository**: https://github.com/hypolas/dockershield
 3. **Repository admin access** to configure secrets
 
 ## 🔑 Step 1: Create Docker Hub Access Token
@@ -15,7 +15,7 @@ This document explains how to configure GitHub Actions to automatically publish 
 3. Go to **Security** tab
 4. Click **New Access Token**
 5. Configure:
-   - **Description**: `GitHub Actions - docker-proxy`
+   - **Description**: `GitHub Actions - dockershield`
    - **Access permissions**: `Read, Write, Delete`
 6. Click **Generate**
 7. **⚠️ IMPORTANT**: Copy the token immediately (you won't see it again!)
@@ -24,7 +24,7 @@ This document explains how to configure GitHub Actions to automatically publish 
 
 Go to your GitHub repository:
 ```
-https://github.com/hypolas/docker-proxy/settings/secrets/actions
+https://github.com/hypolas/dockershield/settings/secrets/actions
 ```
 
 ### Add the following secrets:
@@ -86,7 +86,7 @@ git push origin v1.0.0
 
 After pushing a tag:
 
-1. Go to **Actions** tab: https://github.com/hypolas/docker-proxy/actions
+1. Go to **Actions** tab: https://github.com/hypolas/dockershield/actions
 2. You should see **"Build and Publish Docker Image"** running
 3. Wait for completion (~5-10 minutes for multi-platform build)
 4. Check Docker Hub: https://hub.docker.com/r/hypolas/proxy-docker/tags
@@ -102,7 +102,7 @@ docker pull hypolas/proxy-docker:1.0.0
 
 # Run it
 docker run -d \
-  --name docker-proxy \
+  --name dockershield \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -p 2375:2375 \
   -e CONTAINERS=1 \
@@ -181,7 +181,7 @@ gh release create v1.0.0 \
 
 ### ❌ "Error: failed to solve: failed to read dockerfile"
 - **Cause**: `Dockerfile` not found in repository root
-- **Solution**: Ensure `Dockerfile` exists at `/home/laslite/git/docker-proxy/Dockerfile`
+- **Solution**: Ensure `Dockerfile` exists at `/home/laslite/git/dockershield/Dockerfile`
 
 ### ❌ "Error: unauthorized: authentication required"
 - **Cause**: Invalid or missing Docker Hub credentials
@@ -248,4 +248,4 @@ After setup:
 
 ---
 
-**Questions?** Open an issue at https://github.com/hypolas/docker-proxy/issues
+**Questions?** Open an issue at https://github.com/hypolas/dockershield/issues

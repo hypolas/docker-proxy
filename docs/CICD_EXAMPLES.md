@@ -2,7 +2,7 @@
 
 This guide details how to integrate the proxy into different CI/CD platforms to secure your Docker pipelines.
 
-> ℹ️ Sur des runners auto-hébergés vous pouvez exposer le proxy via un socket Unix en définissant `LISTEN_SOCKET=/tmp/docker-proxy.sock` (et éventuellement `SOCKET_PERMS`). Les jobs doivent alors utiliser `DOCKER_HOST=unix:///tmp/docker-proxy.sock`.
+> ℹ️ Sur des runners auto-hébergés vous pouvez exposer le proxy via un socket Unix en définissant `LISTEN_SOCKET=/tmp/dockershield.sock` (et éventuellement `SOCKET_PERMS`). Les jobs doivent alors utiliser `DOCKER_HOST=unix:///tmp/dockershield.sock`.
 
 ## 🎯 Why Use This Proxy in CI/CD?
 
@@ -35,8 +35,8 @@ on:
     branches: [main, develop]
 
 services:
-  docker-proxy:
-    image: ghcr.io/your-org/docker-proxy:latest
+  dockershield:
+    image: ghcr.io/your-org/dockershield:latest
     env:
       # Allowed endpoints
       CONTAINERS: "1"
@@ -50,8 +50,8 @@ services:
       DKRPRX__CONTAINERS__DENY_PRIVILEGED: "true"
 
       # Proxy protection
-      PROXY_CONTAINER_NAME: docker-proxy
-      LISTEN_SOCKET: unix:///tmp/docker-proxy.sock
+      PROXY_CONTAINER_NAME: dockershield
+      LISTEN_SOCKET: unix:///tmp/dockershield.sock
 
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -65,18 +65,18 @@ jobs:
 
       - name: Set up Docker via Proxy
         run: |
-          export DOCKER_HOST=unix:///tmp/docker-proxy.sock
+          export DOCKER_HOST=unix:///tmp/dockershield.sock
           docker version
 
       - name: Build Docker image
         env:
-          DOCKER_HOST: unix:///tmp/docker-proxy.sock
+          DOCKER_HOST: unix:///tmp/dockershield.sock
         run: |
           docker build -t ghcr.io/your-org/app:${{ github.sha }} .
 
       - name: Push to registry
         env:
-          DOCKER_HOST: unix:///tmp/docker-proxy.sock
+          DOCKER_HOST: unix:///tmp/dockershield.sock
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker push ghcr.io/your-org/app:${{ github.sha }}
@@ -93,8 +93,8 @@ on:
     branches: [main]
 
 services:
-  docker-proxy:
-    image: ghcr.io/your-org/docker-proxy:latest
+  dockershield:
+    image: ghcr.io/your-org/dockershield:latest
     env:
       CONTAINERS: "1"
       IMAGES: "1"
@@ -108,7 +108,7 @@ services:
       DKRPRX__CONTAINERS__REQUIRE_LABELS: "ci=github-actions,team=platform"
       DKRPRX__IMAGES__DENIED_TAGS: "^(latest|dev|test)$"
       DKRPRX__CONTAINERS__DENY_HOST_NETWORK: "true"
-      LISTEN_SOCKET: unix:///tmp/docker-proxy.sock
+      LISTEN_SOCKET: unix:///tmp/dockershield.sock
 
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -118,7 +118,7 @@ jobs:
   build-production:
     runs-on: ubuntu-latest
     env:
-      DOCKER_HOST: unix:///tmp/docker-proxy.sock
+      DOCKER_HOST: unix:///tmp/dockershield.sock
     steps:
       - uses: actions/checkout@v3
 
@@ -139,12 +139,12 @@ jobs:
 ```yaml
 # .gitlab-ci.yml
 variables:
-  DOCKER_HOST: unix:///tmp/docker-proxy.sock
+  DOCKER_HOST: unix:///tmp/dockershield.sock
   DOCKER_DRIVER: overlay2
 
 services:
-  - name: registry.gitlab.com/your-org/docker-proxy:latest
-    alias: docker-proxy
+  - name: registry.gitlab.com/your-org/dockershield:latest
+    alias: dockershield
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /tmp:/tmp
@@ -154,7 +154,7 @@ services:
       BUILD: "1"
       POST: "1"
       DELETE: "1"
-      LISTEN_SOCKET: unix:///tmp/docker-proxy.sock
+      LISTEN_SOCKET: unix:///tmp/dockershield.sock
 
       # Force GitLab registry only
       DKRPRX__CONTAINERS__ALLOWED_IMAGES: "^registry.gitlab.com/your-org/.*"
@@ -189,10 +189,10 @@ build-release:
 
 ```yaml
 # .gitlab-ci.yml with Docker cache
-.docker-proxy:
+.dockershield:
   services:
-    - name: registry.gitlab.com/your-org/docker-proxy:latest
-      alias: docker-proxy
+    - name: registry.gitlab.com/your-org/dockershield:latest
+      alias: dockershield
       volumes:
         - /var/run/docker.sock:/var/run/docker.sock:ro
         - /tmp:/tmp
@@ -201,15 +201,15 @@ build-release:
         IMAGES: "1"
         BUILD: "1"
         POST: "1"
-        LISTEN_SOCKET: unix:///tmp/docker-proxy.sock
+        LISTEN_SOCKET: unix:///tmp/dockershield.sock
         DKRPRX__CONTAINERS__ALLOWED_IMAGES: "^registry.gitlab.com/your-org/.*"
         DKRPRX__IMAGES__DENIED_TAGS: "^latest$"
 
 build-optimized:
-  extends: .docker-proxy
+  extends: .dockershield
   stage: build
   variables:
-    DOCKER_HOST: unix:///tmp/docker-proxy.sock
+    DOCKER_HOST: unix:///tmp/dockershield.sock
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker build --cache-from registry.gitlab.com/your-org/app:cache -t registry.gitlab.com/your-org/app:$CI_COMMIT_SHA .
@@ -232,14 +232,14 @@ pool:
 
 resources:
   containers:
-    - container: docker-proxy
-      image: yourregistry.azurecr.io/docker-proxy:latest
+    - container: dockershield
+      image: yourregistry.azurecr.io/dockershield:latest
       env:
         CONTAINERS: 1
         IMAGES: 1
         BUILD: 1
         POST: 1
-        LISTEN_SOCKET: unix:///tmp/docker-proxy.sock
+        LISTEN_SOCKET: unix:///tmp/dockershield.sock
         DKRPRX__CONTAINERS__ALLOWED_IMAGES: '^yourregistry\.azurecr\.io/.*'
         DKRPRX__IMAGES__DENIED_TAGS: '^latest$'
       volumes:
@@ -247,16 +247,16 @@ resources:
         - /tmp:/tmp
 
 services:
-  docker-proxy: docker-proxy
+  dockershield: dockershield
 
 steps:
   - script: |
-      export DOCKER_HOST=unix:///tmp/docker-proxy.sock
+      export DOCKER_HOST=unix:///tmp/dockershield.sock
       docker build -t yourregistry.azurecr.io/app:$(Build.BuildId) .
     displayName: 'Build Docker Image'
 
   - script: |
-      export DOCKER_HOST=unix:///tmp/docker-proxy.sock
+      export DOCKER_HOST=unix:///tmp/dockershield.sock
       docker push yourregistry.azurecr.io/app:$(Build.BuildId)
     displayName: 'Push to ACR'
 ```
@@ -273,7 +273,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HOST = 'unix:///tmp/docker-proxy.sock'
+        DOCKER_HOST = 'unix:///tmp/dockershield.sock'
         REGISTRY = 'registry.company.com'
     }
 
@@ -282,18 +282,18 @@ pipeline {
             steps {
                 sh '''
                     docker run -d \
-                      --name docker-proxy-${BUILD_NUMBER} \
+                      --name dockershield-${BUILD_NUMBER} \
                       -v /var/run/docker.sock:/var/run/docker.sock:ro \
                       -v /tmp:/tmp \
-                      -e LISTEN_SOCKET=unix:///tmp/docker-proxy.sock \
+                      -e LISTEN_SOCKET=unix:///tmp/dockershield.sock \
                       -e CONTAINERS=1 \
                       -e IMAGES=1 \
                       -e BUILD=1 \
                       -e POST=1 \
                       -e DKRPRX__CONTAINERS__ALLOWED_IMAGES="^${REGISTRY}/.*" \
                       -e DKRPRX__IMAGES__DENIED_TAGS="^latest$" \
-                      -e PROXY_CONTAINER_NAME=docker-proxy-${BUILD_NUMBER} \
-                      registry.company.com/docker-proxy:latest
+                      -e PROXY_CONTAINER_NAME=dockershield-${BUILD_NUMBER} \
+                      registry.company.com/dockershield:latest
                 '''
             }
         }
@@ -320,7 +320,7 @@ pipeline {
 
     post {
         always {
-            sh 'docker rm -f docker-proxy-${BUILD_NUMBER} || true'
+            sh 'docker rm -f dockershield-${BUILD_NUMBER} || true'
         }
     }
 }
@@ -336,11 +336,11 @@ pipeline {
 version: 2.1
 
 executors:
-  docker-proxy:
+  dockershield:
     docker:
       - image: cimg/base:stable
       - image: hypolas/proxy-docker:latest
-        name: docker-proxy
+        name: dockershield
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro
           - /tmp:/tmp
@@ -349,13 +349,13 @@ executors:
           IMAGES: "1"
           BUILD: "1"
           POST: "1"
-          LISTEN_SOCKET: unix:///tmp/docker-proxy.sock
+          LISTEN_SOCKET: unix:///tmp/dockershield.sock
           DKRPRX__CONTAINERS__ALLOWED_IMAGES: "^your-registry\\.io/.*"
           DKRPRX__IMAGES__DENIED_TAGS: "^latest$"
 
 jobs:
   build-and-push:
-    executor: docker-proxy
+    executor: dockershield
     steps:
       - checkout
       - setup_remote_docker:
@@ -364,14 +364,14 @@ jobs:
       - run:
           name: Build Image
           environment:
-            DOCKER_HOST: unix:///tmp/docker-proxy.sock
+            DOCKER_HOST: unix:///tmp/dockershield.sock
           command: |
             docker build -t your-registry.io/app:${CIRCLE_SHA1} .
 
       - run:
           name: Push Image
           environment:
-            DOCKER_HOST: unix:///tmp/docker-proxy.sock
+            DOCKER_HOST: unix:///tmp/dockershield.sock
           command: |
             echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin your-registry.io
             docker push your-registry.io/app:${CIRCLE_SHA1}

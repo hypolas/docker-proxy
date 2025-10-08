@@ -3,17 +3,17 @@ package config
 import (
 	"os"
 
-	"docker-proxy/pkg/filters"
+	"dockershield/pkg/filters"
 )
 
 // GetDefaultFilters retourne les filtres par défaut pour la sécurité
 func GetDefaultFilters() *filters.AdvancedFilter {
-	// Obtenir le nom du conteneur docker-proxy depuis l'environnement
-	proxyContainerName := getEnv("PROXY_CONTAINER_NAME", "docker-proxy")
+	// Obtenir le nom du conteneur dockershield depuis l'environnement
+	proxyContainerName := getEnv("PROXY_CONTAINER_NAME", "dockershield")
 	proxyNetworkName := getEnv("PROXY_NETWORK_NAME", "")
 
 	containerFilter := &filters.ContainerFilter{
-		// Interdire la manipulation du conteneur docker-proxy lui-même
+		// Interdire la manipulation du conteneur dockershield lui-même
 		DeniedNames: []string{
 			`^` + proxyContainerName + `$`,
 			`^/` + proxyContainerName + `$`,

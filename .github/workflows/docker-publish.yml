@@ -57,7 +57,7 @@ jobs:
       - name: Build test binary
         run: |
           echo "🔨 Building test binary to verify compilation..."
-          go build -v -o /tmp/docker-proxy-test ./cmd/docker-proxy
+          go build -v -o /tmp/dockershield-test ./cmd/dockershield
           echo "✅ Build successful"
 
   # Job 2: Build and Push Docker Image
@@ -179,22 +179,22 @@ jobs:
           mkdir -p dist
 
           # Build for Linux amd64
-          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/docker-proxy-linux-amd64 ./cmd/docker-proxy
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/dockershield-linux-amd64 ./cmd/dockershield
 
           # Build for Linux arm64
-          GOOS=linux GOARCH=arm64 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/docker-proxy-linux-arm64 ./cmd/docker-proxy
+          GOOS=linux GOARCH=arm64 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/dockershield-linux-arm64 ./cmd/dockershield
 
           # Build for Linux arm v7
-          GOOS=linux GOARCH=arm GOARM=7 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/docker-proxy-linux-armv7 ./cmd/docker-proxy
+          GOOS=linux GOARCH=arm GOARM=7 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/dockershield-linux-armv7 ./cmd/dockershield
 
           # Build for macOS amd64
-          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/docker-proxy-darwin-amd64 ./cmd/docker-proxy
+          GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/dockershield-darwin-amd64 ./cmd/dockershield
 
           # Build for macOS arm64 (Apple Silicon)
-          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/docker-proxy-darwin-arm64 ./cmd/docker-proxy
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/dockershield-darwin-arm64 ./cmd/dockershield
 
           # Build for Windows amd64
-          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/docker-proxy-windows-amd64.exe ./cmd/docker-proxy
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -X main.Version=${{ github.ref_name }} -X main.BuildDate=$(date -u +'%Y-%m-%dT%H:%M:%SZ') -X main.GitCommit=${{ github.sha }}" -o dist/dockershield-windows-amd64.exe ./cmd/dockershield
 
           # Create checksums
           cd dist
@@ -246,7 +246,7 @@ jobs:
 
           ```bash
           docker pull hypolas/proxy-docker:${GITHUB_REF_NAME#v}
-          docker run -d --name docker-proxy \
+          docker run -d --name dockershield \
             -v /var/run/docker.sock:/var/run/docker.sock:ro \
             -p 2375:2375 \
             -e CONTAINERS=1 -e IMAGES=1 \
@@ -257,10 +257,10 @@ jobs:
 
           ```bash
           docker pull hypolas/proxy-docker:${GITHUB_REF_NAME#v}
-          docker run -d --name docker-proxy \
+          docker run -d --name dockershield \
             -v /var/run/docker.sock:/var/run/docker.sock:ro \
             -v /tmp:/tmp \
-            -e LISTEN_SOCKET=unix:///tmp/docker-proxy.sock \
+            -e LISTEN_SOCKET=unix:///tmp/dockershield.sock \
             -e CONTAINERS=1 -e IMAGES=1 \
             hypolas/proxy-docker:${GITHUB_REF_NAME#v}
           ```
@@ -278,8 +278,8 @@ jobs:
           export CONTAINERS=1
           export IMAGES=1
 
-          chmod +x docker-proxy-linux-amd64
-          ./docker-proxy-linux-amd64
+          chmod +x dockershield-linux-amd64
+          ./dockershield-linux-amd64
           ```
 
           ### 🏗️ Supported Platforms
@@ -300,19 +300,19 @@ jobs:
 
           ### 📚 Documentation
 
-          - [README](https://github.com/hypolas/docker-proxy/blob/main/README.md)
-          - [Security Guide](https://github.com/hypolas/docker-proxy/blob/main/docs/SECURITY.md)
-          - [Configuration](https://github.com/hypolas/docker-proxy/blob/main/docs/ENV_FILTERS.md)
-          - [CI/CD Examples](https://github.com/hypolas/docker-proxy/blob/main/docs/CICD_EXAMPLES.md)
+          - [README](https://github.com/hypolas/dockershield/blob/main/README.md)
+          - [Security Guide](https://github.com/hypolas/dockershield/blob/main/docs/SECURITY.md)
+          - [Configuration](https://github.com/hypolas/dockershield/blob/main/docs/ENV_FILTERS.md)
+          - [CI/CD Examples](https://github.com/hypolas/dockershield/blob/main/docs/CICD_EXAMPLES.md)
 
           ### 📞 Support
 
-          - Report issues: https://github.com/hypolas/docker-proxy/issues
+          - Report issues: https://github.com/hypolas/dockershield/issues
           - Email: nicolas.hypolite@gmail.com
 
           ---
 
-          **Full Changelog**: https://github.com/hypolas/docker-proxy/commits/${{ github.ref_name }}
+          **Full Changelog**: https://github.com/hypolas/dockershield/commits/${{ github.ref_name }}
           EOF
 
       - name: Create GitHub Release
@@ -322,12 +322,12 @@ jobs:
           draft: false
           prerelease: ${{ contains(github.ref, '-') }}
           files: |
-            dist/docker-proxy-linux-amd64
-            dist/docker-proxy-linux-arm64
-            dist/docker-proxy-linux-armv7
-            dist/docker-proxy-darwin-amd64
-            dist/docker-proxy-darwin-arm64
-            dist/docker-proxy-windows-amd64.exe
+            dist/dockershield-linux-amd64
+            dist/dockershield-linux-arm64
+            dist/dockershield-linux-armv7
+            dist/dockershield-darwin-amd64
+            dist/dockershield-darwin-arm64
+            dist/dockershield-windows-amd64.exe
             dist/checksums.txt
           fail_on_unmatched_files: true
         env:
@@ -337,7 +337,7 @@ jobs:
         run: |
           echo "## 📦 GitHub Release Created" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Release URL:** https://github.com/hypolas/docker-proxy/releases/tag/${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Release URL:** https://github.com/hypolas/dockershield/releases/tag/${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Binaries:** 6 platforms + checksums" >> $GITHUB_STEP_SUMMARY
           echo "- Linux: amd64, arm64, armv7" >> $GITHUB_STEP_SUMMARY
@@ -347,5 +347,5 @@ jobs:
           echo "**Download:**" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
           echo "# Binary download from:" >> $GITHUB_STEP_SUMMARY
-          echo "# https://github.com/hypolas/docker-proxy/releases/tag/${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "# https://github.com/hypolas/dockershield/releases/tag/${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

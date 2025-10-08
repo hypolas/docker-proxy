@@ -195,7 +195,7 @@ git tag -a v1.0.0 -m "Release v1.0.0
 git push origin v1.0.0
 
 # 3. Check workflow
-# https://github.com/hypolas/docker-proxy/actions
+# https://github.com/hypolas/dockershield/actions
 
 # 4. Verify Docker Hub
 # https://hub.docker.com/r/hypolas/proxy-docker/tags

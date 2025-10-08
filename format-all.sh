@@ -2,7 +2,7 @@
 # Format all Go files with gofmt
 
 echo "Formatting all Go files..."
-gofmt -w cmd/docker-proxy/main.go
+gofmt -w cmd/dockershield/main.go
 gofmt -w config/config.go
 gofmt -w config/env_filters.go
 gofmt -w config/defaults.go

@@ -1,10 +1,10 @@
 # Configuration Conflict Resolution - Docker Proxy
 
-This document explains how docker-proxy handles conflicts between different configuration sources.
+This document explains how dockershield handles conflicts between different configuration sources.
 
 ## 🔄 Configuration Priority Order
 
-docker-proxy uses **3 configuration sources** with the following priority order:
+dockershield uses **3 configuration sources** with the following priority order:
 
 ```
 1. Environment variables (DKRPRX__*)    ← HIGHEST PRIORITY
@@ -159,8 +159,8 @@ DeniedPaths: []string{
 **Containers** (defaults.go:15):
 ```go
 DeniedNames: []string{
-    `^docker-proxy$`,    // Protect the proxy itself
-    `^/docker-proxy$`,
+    `^dockershield$`,    // Protect the proxy itself
+    `^/dockershield$`,
 }
 ```
 
@@ -246,7 +246,7 @@ func CheckVolumeMount(volumeName, hostPath, driver string) (bool, string) {
 ```
 
 ```bash
-FILTERS_CONFIG=/etc/docker-proxy/filters.json
+FILTERS_CONFIG=/etc/dockershield/filters.json
 # Volumes defaults are REPLACED by JSON
 # ⚠️ Docker socket is NO LONGER protected!
 ```
@@ -306,8 +306,8 @@ docker run --rm \
 
 ```bash
 # See active rules in logs
-docker logs docker-proxy | grep "Access Rules Configuration"
-docker logs docker-proxy | grep "Advanced Filters"
+docker logs dockershield | grep "Access Rules Configuration"
+docker logs dockershield | grep "Advanced Filters"
 ```
 
 ## 📚 Reference Files

@@ -3,13 +3,13 @@
 > **Secure Docker proxy for CI/CD, DevOps and multi-tenant environments** with advanced and granular filtering system.
 
 [![Docker Hub](https://img.shields.io/docker/pulls/hypolas/proxy-docker)](https://hub.docker.com/r/hypolas/proxy-docker)
-[![GitHub](https://img.shields.io/github/stars/hypolas/docker-proxy?style=social)](https://github.com/hypolas/docker-proxy)
+[![GitHub](https://img.shields.io/github/stars/hypolas/dockershield?style=social)](https://github.com/hypolas/dockershield)
 [![License](https://img.shields.io/badge/License-Dual%20(GPL--3.0%20%2B%20Commercial)-blue)](LICENSE)
 
 A professional Docker socket proxy with **advanced regex filtering**, specifically designed to **secure CI/CD pipelines** (GitHub Actions, GitLab CI, Jenkins, CircleCI, etc.) and **cloud-native environments**. Inspired by [Tecnativa/docker-socket-proxy](https://github.com/Tecnativa/docker-socket-proxy), implemented in high-performance Go with Gin and Resty.
 
 **🐳 Docker Hub:** [hypolas/proxy-docker](https://hub.docker.com/r/hypolas/proxy-docker)
-**📦 GitHub:** [hypolas/docker-proxy](https://github.com/hypolas/docker-proxy)
+**📦 GitHub:** [hypolas/dockershield](https://github.com/hypolas/dockershield)
 
 ## 🎯 Main Use Cases
 
@@ -108,7 +108,7 @@ docker pull hypolas/proxy-docker:1.0.0
 
 # Run it
 docker run -d \
-  --name docker-proxy \
+  --name dockershield \
   -v /var/run/docker.sock:/var/run/docker.sock:ro \
   -p 2375:2375 \
   -e CONTAINERS=1 \
@@ -127,17 +127,17 @@ Download ready-to-use binaries from GitHub Releases:
 
 ```bash
 # Linux amd64
-wget https://github.com/hypolas/docker-proxy/releases/latest/download/docker-proxy-linux-amd64
-chmod +x docker-proxy-linux-amd64
-./docker-proxy-linux-amd64
+wget https://github.com/hypolas/dockershield/releases/latest/download/dockershield-linux-amd64
+chmod +x dockershield-linux-amd64
+./dockershield-linux-amd64
 
 # macOS Apple Silicon
-wget https://github.com/hypolas/docker-proxy/releases/latest/download/docker-proxy-darwin-arm64
-chmod +x docker-proxy-darwin-arm64
-./docker-proxy-darwin-arm64
+wget https://github.com/hypolas/dockershield/releases/latest/download/dockershield-darwin-arm64
+chmod +x dockershield-darwin-arm64
+./dockershield-darwin-arm64
 
 # Windows
-# Download from: https://github.com/hypolas/docker-proxy/releases/latest
+# Download from: https://github.com/hypolas/dockershield/releases/latest
 ```
 
 **Available platforms:**
@@ -147,7 +147,7 @@ chmod +x docker-proxy-darwin-arm64
 
 **Verify checksums:**
 ```bash
-wget https://github.com/hypolas/docker-proxy/releases/latest/download/checksums.txt
+wget https://github.com/hypolas/dockershield/releases/latest/download/checksums.txt
 sha256sum -c checksums.txt --ignore-missing
 ```
 
@@ -155,12 +155,12 @@ sha256sum -c checksums.txt --ignore-missing
 
 ```bash
 # Clone repository
-git clone https://github.com/hypolas/docker-proxy.git
-cd docker-proxy
+git clone https://github.com/hypolas/dockershield.git
+cd dockershield
 
 # Build binary
 go mod download
-go build -o docker-proxy ./cmd/docker-proxy
+go build -o dockershield ./cmd/dockershield
 
 # Or build Docker image
 docker build -t hypolas/proxy-docker .
@@ -225,7 +225,7 @@ Allowed **by default** (value: `1`):
 ```bash
 export CONTAINERS=1
 export IMAGES=1
-./docker-proxy
+./dockershield
 ```
 
 ### Read-write mode
@@ -235,25 +235,25 @@ export CONTAINERS=1
 export IMAGES=1
 export POST=1
 export DELETE=1
-./docker-proxy
+./dockershield
 ```
 
 ### Listen on Unix socket (recommended for security)
 
 ```bash
 # Listen on Unix socket instead of TCP
-export LISTEN_SOCKET=unix:///tmp/docker-proxy.sock
+export LISTEN_SOCKET=unix:///tmp/dockershield.sock
 export CONTAINERS=1
 export IMAGES=1
-./docker-proxy
+./dockershield
 
 # Test with curl
-curl --unix-socket /tmp/docker-proxy.sock http://localhost/v1.41/containers/json
+curl --unix-socket /tmp/dockershield.sock http://localhost/v1.41/containers/json
 ```
 
 > 🔒 **Security**: `LISTEN_SOCKET` always takes precedence over `LISTEN_ADDR`. Unix sockets avoid network exposure and offer better permission control.
 >
-> ⚠️ **Docker**: If you use `LISTEN_SOCKET=unix:///tmp/docker-proxy.sock`, you must mount the corresponding directory in volumes: `-v /tmp:/tmp`. The path in the `unix:///path` format must match the mounted volume.
+> ⚠️ **Docker**: If you use `LISTEN_SOCKET=unix:///tmp/dockershield.sock`, you must mount the corresponding directory in volumes: `-v /tmp:/tmp`. The path in the `unix:///path` format must match the mounted volume.
 
 # Architecture
 ## With a Docker agent:
@@ -262,10 +262,10 @@ Proxy configuration sample:
 
 ```yaml
 services:
-  docker-proxy:
+  dockershield:
     build: .
     image: hypolas/proxy-docker:latest
-    container_name: docker-proxy
+    container_name: dockershield
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /tmp:/tmp  # ⚠️ IMPORTANT: must match the path in LISTEN_SOCKET
@@ -284,7 +284,7 @@ graph LR
     end
 
     subgraph "Proxy Container"
-        proxy[docker-proxy]
+        proxy[dockershield]
         proxySock[[unix:///tmp/docker_proxy.sock]]
     end
 
@@ -315,7 +315,7 @@ name: Docker Build
 on: [push]
 
 services:
-  docker-proxy:
+  dockershield:
     image: hypolas/proxy-docker:latest
     env:
       CONTAINERS: 1
@@ -326,10 +326,10 @@ services:
       DKRPRX__CONTAINERS__ALLOWED_IMAGES: "^registry.company.com/.*"
       # Block :latest
       DKRPRX__IMAGES__DENIED_TAGS: "^latest$"
-      LISTEN_SOCKET: unix:///tmp/docker-proxy.sock
+      LISTEN_SOCKET: unix:///tmp/dockershield.sock
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /tmp:/tmp  # ⚠️ Required for LISTEN_SOCKET unix:///tmp/docker-proxy.sock
+      - /tmp:/tmp  # ⚠️ Required for LISTEN_SOCKET unix:///tmp/dockershield.sock
 
 jobs:
   build:
@@ -338,7 +338,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build Docker image
         env:
-          DOCKER_HOST: /tmp/docker-proxy.sock
+          DOCKER_HOST: /tmp/dockershield.sock
         run: docker build -t registry.company.com/app:${{ github.sha }} .
 ```
 
@@ -347,10 +347,10 @@ jobs:
 ```yaml
 # .gitlab-ci.yml
 variables:
-  DOCKER_HOST: unix:///tmp/docker-proxy.sock
+  DOCKER_HOST: unix:///tmp/dockershield.sock
 
   - name: hypolas/proxy-docker:latest
-    alias: docker-proxy
+    alias: dockershield
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /tmp:/tmp  # ⚠️ Required for LISTEN_SOCKET
@@ -360,7 +360,7 @@ variables:
       BUILD: "1"
       POST: "1"
       DKRPRX__CONTAINERS__ALLOWED_IMAGES: "^registry.company.com/.*"
-      LISTEN_SOCKET: unix:///tmp/docker-proxy.sock
+      LISTEN_SOCKET: unix:///tmp/dockershield.sock
 
 build:
   script:
@@ -374,7 +374,7 @@ build:
 pipeline {
   agent any
   environment {
-    DOCKER_HOST = 'tcp://docker-proxy:2375'
+    DOCKER_HOST = 'tcp://dockershield:2375'
   }
   stages {
     stage('Build') {
@@ -390,7 +390,7 @@ pipeline {
 
 ```yaml
 services:
-  docker-proxy:
+  dockershield:
     build: .
     ports:
       - "2375:2375"
@@ -416,17 +416,17 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o docker-proxy ./cmd/docker-proxy
+RUN CGO_ENABLED=0 GOOS=linux go build -o dockershield ./cmd/dockershield
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
-COPY --from=builder /app/docker-proxy .
+COPY --from=builder /app/dockershield .
 
 EXPOSE 2375
 
-CMD ["./docker-proxy"]
+CMD ["./dockershield"]
 ```
 
 ## 🏗️ Architecture
@@ -434,7 +434,7 @@ CMD ["./docker-proxy"]
 ```
 .
 ├── cmd/
-│   └── docker-proxy/       # Application entry point
+│   └── dockershield/       # Application entry point
 │       └── main.go
 ├── config/                 # Configuration and env var loading
 │   └── config.go
@@ -613,7 +613,7 @@ The following paths are **blocked by default**:
 - `/run/docker.sock`
 
 ### 🛡️ Proxy Container Protection
-The `docker-proxy` container itself is **protected against any manipulation**:
+The `dockershield` container itself is **protected against any manipulation**:
 - ❌ Cannot stop/restart the proxy container
 - ❌ Cannot modify the proxy container
 - ❌ Cannot delete the proxy container
@@ -623,11 +623,11 @@ If the proxy uses a dedicated network, it is also protected.
 
 ### ⚙️ Configuration
 ```bash
-# Proxy container name (default: docker-proxy)
-export PROXY_CONTAINER_NAME="docker-proxy"
+# Proxy container name (default: dockershield)
+export PROXY_CONTAINER_NAME="dockershield"
 
 # Proxy network name (optional)
-export PROXY_NETWORK_NAME="docker-proxy-network"
+export PROXY_NETWORK_NAME="dockershield-network"
 ```
 
 ### 🔓 Disabling (not recommended)
@@ -659,7 +659,7 @@ To test the proxy:
 ```bash
 # Start proxy with containers in read-only
 export CONTAINERS=1
-./docker-proxy
+./dockershield
 
 # In another terminal
 curl http://localhost:2375/v1.41/containers/json
@@ -672,15 +672,15 @@ curl http://localhost:2375/v1.41/images/json  # 403 Forbidden
 
 ```bash
 # Start proxy on Unix socket
-export LISTEN_SOCKET=/tmp/docker-proxy.sock
+export LISTEN_SOCKET=/tmp/dockershield.sock
 export CONTAINERS=1
-./docker-proxy
+./dockershield
 
 # In another terminal
-curl --unix-socket /tmp/docker-proxy.sock http://localhost/v1.41/containers/json
+curl --unix-socket /tmp/dockershield.sock http://localhost/v1.41/containers/json
 
 # Or with Docker CLI
-export DOCKER_HOST=unix:///tmp/docker-proxy.sock
+export DOCKER_HOST=unix:///tmp/dockershield.sock
 docker ps
 ```
 

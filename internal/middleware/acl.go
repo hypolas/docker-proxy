@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"docker-proxy/pkg/rules"
+	"dockershield/pkg/rules"
 
 	"github.com/gin-gonic/gin"
 )

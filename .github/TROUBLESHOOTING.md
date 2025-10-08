@@ -114,7 +114,7 @@ git push origin v1.0.0
 
 1. **Check workflow run details:**
    ```
-   https://github.com/hypolas/docker-proxy/actions
+   https://github.com/hypolas/dockershield/actions
    ```
 
 2. **Look for "Debug - Show generated tags" step:**
@@ -347,7 +347,7 @@ If issue persists:
 
 1. **Check existing issues:**
    ```
-   https://github.com/hypolas/docker-proxy/issues
+   https://github.com/hypolas/dockershield/issues
    ```
 
 2. **Create new issue with:**

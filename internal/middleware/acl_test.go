@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"docker-proxy/config"
-	"docker-proxy/pkg/rules"
+	"dockershield/config"
+	"dockershield/pkg/rules"
 
 	"github.com/gin-gonic/gin"
 )

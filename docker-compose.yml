@@ -1,8 +1,8 @@
 services:
-  docker-proxy:
+  dockershield:
     build: .
     image: hypolas/proxy-docker:latest
-    container_name: docker-proxy
+    container_name: dockershield
     ports:
       - "2375:2375"
     volumes:
@@ -16,8 +16,8 @@ services:
       - LOG_LEVEL=info
 
       # Protection du proxy (auto-protection)
-      - PROXY_CONTAINER_NAME=docker-proxy
-      - PROXY_NETWORK_NAME=docker-proxy
+      - PROXY_CONTAINER_NAME=dockershield
+      - PROXY_NETWORK_NAME=dockershield
 
       # Endpoints autorisés (lecture seule)
       - CONTAINERS=1
@@ -32,8 +32,8 @@ services:
       - PUT=0
     restart: unless-stopped
     networks:
-      - docker-proxy
+      - dockershield
 
 networks:
-  docker-proxy:
+  dockershield:
     driver: bridge

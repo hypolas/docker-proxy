@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"docker-proxy/pkg/filters"
+	"dockershield/pkg/filters"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"

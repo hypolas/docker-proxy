@@ -35,7 +35,7 @@ VERBOSE=1 ./gofmt-all.sh
 🔧 Formatting all Go files with gofmt...
 
 Searching for Go files...
-📄 Processing: ./cmd/docker-proxy/main.go
+📄 Processing: ./cmd/dockershield/main.go
    ✅ Formatted
 📄 Processing: ./config/config.go
    ✓ Already formatted
@@ -89,7 +89,7 @@ chmod +x check-lint-config.sh
 
 ### 3. `test-config-conflicts.sh` - Tests de conflits de configuration
 
-Démontre et teste les différents scénarios de conflits de configuration dans docker-proxy.
+Démontre et teste les différents scénarios de conflits de configuration dans dockershield.
 
 **Usage:**
 ```bash
@@ -114,7 +114,7 @@ chmod +x test-config-conflicts.sh
 
 **Exemple de sortie:**
 ```
-🧪 Test des Conflits de Configuration - docker-proxy
+🧪 Test des Conflits de Configuration - dockershield
 ======================================================
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -159,7 +159,7 @@ go test ./...
 golangci-lint run
 
 # 4. Build de vérification
-go build ./cmd/docker-proxy
+go build ./cmd/dockershield
 ```
 
 ### Avant de Push un Tag
@@ -178,8 +178,8 @@ golangci-lint run --timeout=5m
 ./check-lint-config.sh
 
 # 5. Build multi-plateforme
-GOOS=linux GOARCH=amd64 go build ./cmd/docker-proxy
-GOOS=linux GOARCH=arm64 go build ./cmd/docker-proxy
+GOOS=linux GOARCH=amd64 go build ./cmd/dockershield
+GOOS=linux GOARCH=arm64 go build ./cmd/dockershield
 
 # 6. Créer le tag
 git tag v0.2.0 -m "Release v0.2.0"
@@ -303,7 +303,7 @@ TERM=dumb ./gofmt-all.sh
 
 **Solution:** Assurez-vous d'exécuter le script depuis la racine du projet
 ```bash
-cd /path/to/docker-proxy
+cd /path/to/dockershield
 ./gofmt-all.sh
 ```
 
