@@ -7,9 +7,9 @@
 
 # Build outputs
 /cmd/*/dockershield
-/dist/
-dockershield
-dockershield-*
+# /dist/
+!/cmd/dockershield/*.go
+# dockershield-*
 
 # Test binary
 *.test
