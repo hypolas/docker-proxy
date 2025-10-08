@@ -33,10 +33,10 @@ git tag v1.2.3
 git push origin v1.2.3
 
 # Creates Docker tags:
-# ├─ hypolas/proxy-docker:1.2.3   (full version)
-# ├─ hypolas/proxy-docker:1.2     (major.minor)
-# ├─ hypolas/proxy-docker:1       (major)
-# └─ hypolas/proxy-docker:latest  (latest stable)
+# ├─ hypolas/dockershield:1.2.3   (full version)
+# ├─ hypolas/dockershield:1.2     (major.minor)
+# ├─ hypolas/dockershield:1       (major)
+# └─ hypolas/dockershield:latest  (latest stable)
 ```
 
 ### 🧪 Pre-release Tags
@@ -48,7 +48,7 @@ git tag v1.0.0-beta
 git push origin v1.0.0-beta
 
 # Creates only:
-# └─ hypolas/proxy-docker:1.0.0-beta
+# └─ hypolas/dockershield:1.0.0-beta
 #
 # Note: Does NOT update 'latest' tag
 ```
@@ -63,10 +63,10 @@ git tag -a v1.0.0 -m "First stable release"
 git push origin v1.0.0
 
 # GitHub Actions creates:
-docker pull hypolas/proxy-docker:1.0.0
-docker pull hypolas/proxy-docker:1.0
-docker pull hypolas/proxy-docker:1
-docker pull hypolas/proxy-docker:latest   # ← Points to 1.0.0
+docker pull hypolas/dockershield:1.0.0
+docker pull hypolas/dockershield:1.0
+docker pull hypolas/dockershield:1
+docker pull hypolas/dockershield:latest   # ← Points to 1.0.0
 ```
 
 ### Example 2: Patch Release
@@ -77,10 +77,10 @@ git tag -a v1.0.1 -m "Bug fix release"
 git push origin v1.0.1
 
 # GitHub Actions creates:
-docker pull hypolas/proxy-docker:1.0.1
-docker pull hypolas/proxy-docker:1.0       # ← Now points to 1.0.1
-docker pull hypolas/proxy-docker:1         # ← Still points to 1.0.1
-docker pull hypolas/proxy-docker:latest    # ← Now points to 1.0.1
+docker pull hypolas/dockershield:1.0.1
+docker pull hypolas/dockershield:1.0       # ← Now points to 1.0.1
+docker pull hypolas/dockershield:1         # ← Still points to 1.0.1
+docker pull hypolas/dockershield:latest    # ← Now points to 1.0.1
 ```
 
 ### Example 3: Minor Version
@@ -91,10 +91,10 @@ git tag -a v1.1.0 -m "New features"
 git push origin v1.1.0
 
 # GitHub Actions creates:
-docker pull hypolas/proxy-docker:1.1.0
-docker pull hypolas/proxy-docker:1.1       # ← Points to 1.1.0
-docker pull hypolas/proxy-docker:1         # ← Now points to 1.1.0
-docker pull hypolas/proxy-docker:latest    # ← Now points to 1.1.0
+docker pull hypolas/dockershield:1.1.0
+docker pull hypolas/dockershield:1.1       # ← Points to 1.1.0
+docker pull hypolas/dockershield:1         # ← Now points to 1.1.0
+docker pull hypolas/dockershield:latest    # ← Now points to 1.1.0
 ```
 
 ### Example 4: Major Version
@@ -105,13 +105,13 @@ git tag -a v2.0.0 -m "Major release with breaking changes"
 git push origin v2.0.0
 
 # GitHub Actions creates:
-docker pull hypolas/proxy-docker:2.0.0
-docker pull hypolas/proxy-docker:2.0       # ← Points to 2.0.0
-docker pull hypolas/proxy-docker:2         # ← Points to 2.0.0
-docker pull hypolas/proxy-docker:latest    # ← Now points to 2.0.0
+docker pull hypolas/dockershield:2.0.0
+docker pull hypolas/dockershield:2.0       # ← Points to 2.0.0
+docker pull hypolas/dockershield:2         # ← Points to 2.0.0
+docker pull hypolas/dockershield:latest    # ← Now points to 2.0.0
 
 # Note: Tag '1' still points to latest 1.x version
-docker pull hypolas/proxy-docker:1         # ← Still points to 1.1.0
+docker pull hypolas/dockershield:1         # ← Still points to 1.1.0
 ```
 
 ### Example 5: Beta Release
@@ -122,7 +122,7 @@ git tag -a v1.2.0-beta -m "Beta testing"
 git push origin v1.2.0-beta
 
 # GitHub Actions creates:
-docker pull hypolas/proxy-docker:1.2.0-beta
+docker pull hypolas/dockershield:1.2.0-beta
 
 # Note: Does NOT create 1.2, 1, or latest tags
 # latest still points to previous stable (e.g., 1.1.0)
@@ -136,17 +136,17 @@ git tag -a v2.0.0-rc1 -m "Release candidate 1"
 git push origin v2.0.0-rc1
 
 # GitHub Actions creates:
-docker pull hypolas/proxy-docker:2.0.0-rc1
+docker pull hypolas/dockershield:2.0.0-rc1
 
 # After testing, create stable release:
 git tag -a v2.0.0 -m "Stable release"
 git push origin v2.0.0
 
 # Now creates full set of tags:
-docker pull hypolas/proxy-docker:2.0.0
-docker pull hypolas/proxy-docker:2.0
-docker pull hypolas/proxy-docker:2
-docker pull hypolas/proxy-docker:latest    # ← Updates to 2.0.0
+docker pull hypolas/dockershield:2.0.0
+docker pull hypolas/dockershield:2.0
+docker pull hypolas/dockershield:2
+docker pull hypolas/dockershield:latest    # ← Updates to 2.0.0
 ```
 
 ## 🎯 Best Practices
@@ -222,11 +222,11 @@ git ls-remote --tags origin
 
 ```bash
 # View on Docker Hub
-https://hub.docker.com/r/hypolas/proxy-docker/tags
+https://hub.docker.com/r/hypolas/dockershield/tags
 
 # Or via CLI
-docker pull hypolas/proxy-docker:latest
-docker images hypolas/proxy-docker
+docker pull hypolas/dockershield:latest
+docker images hypolas/dockershield
 ```
 
 ### Check GitHub Actions

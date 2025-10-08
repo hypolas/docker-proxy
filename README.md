@@ -2,13 +2,13 @@
 
 > **Secure Docker proxy for CI/CD, DevOps and multi-tenant environments** with advanced and granular filtering system.
 
-[![Docker Hub](https://img.shields.io/docker/pulls/hypolas/proxy-docker)](https://hub.docker.com/r/hypolas/proxy-docker)
+[![Docker Hub](https://img.shields.io/docker/pulls/hypolas/dockershield)](https://hub.docker.com/r/hypolas/dockershield)
 [![GitHub](https://img.shields.io/github/stars/hypolas/dockershield?style=social)](https://github.com/hypolas/dockershield)
 [![License](https://img.shields.io/badge/License-Dual%20(GPL--3.0%20%2B%20Commercial)-blue)](LICENSE)
 
 A professional Docker socket proxy with **advanced regex filtering**, specifically designed to **secure CI/CD pipelines** (GitHub Actions, GitLab CI, Jenkins, CircleCI, etc.) and **cloud-native environments**. Inspired by [Tecnativa/docker-socket-proxy](https://github.com/Tecnativa/docker-socket-proxy), implemented in high-performance Go with Gin and Resty.
 
-**🐳 Docker Hub:** [hypolas/proxy-docker](https://hub.docker.com/r/hypolas/proxy-docker)
+**🐳 Docker Hub:** [hypolas/dockershield](https://hub.docker.com/r/hypolas/dockershield)
 **📦 GitHub:** [hypolas/dockershield](https://github.com/hypolas/dockershield)
 
 ## 🎯 Main Use Cases
@@ -101,10 +101,10 @@ Pull the pre-built image from Docker Hub:
 
 ```bash
 # Pull latest version
-docker pull hypolas/proxy-docker:latest
+docker pull hypolas/dockershield:latest
 
 # Or specific version
-docker pull hypolas/proxy-docker:1.0.0
+docker pull hypolas/dockershield:1.0.0
 
 # Run it
 docker run -d \
@@ -113,7 +113,7 @@ docker run -d \
   -p 2375:2375 \
   -e CONTAINERS=1 \
   -e IMAGES=1 \
-  hypolas/proxy-docker:latest
+  hypolas/dockershield:latest
 ```
 
 **Multi-platform support:**
@@ -163,7 +163,7 @@ go mod download
 go build -o dockershield ./cmd/dockershield
 
 # Or build Docker image
-docker build -t hypolas/proxy-docker .
+docker build -t hypolas/dockershield .
 ```
 
 ## 📋 Configuration
@@ -264,7 +264,7 @@ Proxy configuration sample:
 services:
   dockershield:
     build: .
-    image: hypolas/proxy-docker:latest
+    image: hypolas/dockershield:latest
     container_name: dockershield
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -316,7 +316,7 @@ on: [push]
 
 services:
   dockershield:
-    image: hypolas/proxy-docker:latest
+    image: hypolas/dockershield:latest
     env:
       CONTAINERS: 1
       IMAGES: 1
@@ -349,7 +349,7 @@ jobs:
 variables:
   DOCKER_HOST: unix:///tmp/dockershield.sock
 
-  - name: hypolas/proxy-docker:latest
+  - name: hypolas/dockershield:latest
     alias: dockershield
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro

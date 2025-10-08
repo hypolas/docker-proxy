@@ -22,7 +22,7 @@ docker run -d \
   -e NETWORKS=1 \
   -e VOLUMES=1 \
   -e INFO=1 \
-  hypolas/proxy-docker:latest
+  hypolas/dockershield:latest
 ```
 
 **What this does**:
@@ -54,7 +54,7 @@ docker run -d \
   -e POST=1 \
   -e DELETE=1 \
   -e PROXY_CONTAINER_NAME=dockershield \
-  hypolas/proxy-docker:latest
+  hypolas/dockershield:latest
 ```
 
 **What this does**:
@@ -179,7 +179,7 @@ docker run -d \
   -e DKRPRX__NETWORKS__ALLOWED_NAMES="^tenant1-.*" \
   -e DKRPRX__IMAGES__ALLOWED_REGISTRIES="registry.tenant1.com" \
   -e PROXY_CONTAINER_NAME=dockershield-tenant1 \
-  hypolas/proxy-docker:latest
+  hypolas/dockershield:latest
 ```
 
 **What this does**:
@@ -201,7 +201,7 @@ docker run -d \
   -e CONTAINERS=1 \
   -e IMAGES=1 \
   -e INFO=1 \
-  hypolas/proxy-docker:latest
+  hypolas/dockershield:latest
 ```
 
 **Usage**:

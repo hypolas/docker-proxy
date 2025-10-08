@@ -297,7 +297,7 @@ docker run --rm \
   -e CONTAINERS=1 \
   -e DKRPRX__VOLUMES__DENIED_PATHS=/var/log \
   -e LOG_LEVEL=debug \
-  hypolas/proxy-docker:latest
+  hypolas/dockershield:latest
 
 # Check logs to see applied configuration
 ```

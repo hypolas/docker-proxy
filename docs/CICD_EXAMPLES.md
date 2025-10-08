@@ -339,7 +339,7 @@ executors:
   dockershield:
     docker:
       - image: cimg/base:stable
-      - image: hypolas/proxy-docker:latest
+      - image: hypolas/dockershield:latest
         name: dockershield
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock:ro

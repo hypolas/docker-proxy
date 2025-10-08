@@ -7,7 +7,7 @@ on:
       - v*.*.*-*    # Also support pre-release tags (v1.0.0-beta, v1.0.0-rc1, etc.)
 
 env:
-  DOCKER_IMAGE: hypolas/proxy-docker
+  DOCKER_IMAGE: hypolas/dockershield
   PLATFORMS: linux/amd64,linux/arm64,linux/arm/v7
 
 jobs:
@@ -245,24 +245,24 @@ jobs:
           TCP:
 
           ```bash
-          docker pull hypolas/proxy-docker:${GITHUB_REF_NAME#v}
+          docker pull hypolas/dockershield:${GITHUB_REF_NAME#v}
           docker run -d --name dockershield \
             -v /var/run/docker.sock:/var/run/docker.sock:ro \
             -p 2375:2375 \
             -e CONTAINERS=1 -e IMAGES=1 \
-            hypolas/proxy-docker:${GITHUB_REF_NAME#v}
+            hypolas/dockershield:${GITHUB_REF_NAME#v}
           ```
 
           Socket:
 
           ```bash
-          docker pull hypolas/proxy-docker:${GITHUB_REF_NAME#v}
+          docker pull hypolas/dockershield:${GITHUB_REF_NAME#v}
           docker run -d --name dockershield \
             -v /var/run/docker.sock:/var/run/docker.sock:ro \
             -v /tmp:/tmp \
             -e LISTEN_SOCKET=unix:///tmp/dockershield.sock \
             -e CONTAINERS=1 -e IMAGES=1 \
-            hypolas/proxy-docker:${GITHUB_REF_NAME#v}
+            hypolas/dockershield:${GITHUB_REF_NAME#v}
           ```
 
 

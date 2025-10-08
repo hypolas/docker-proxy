@@ -120,10 +120,10 @@ git push origin v1.0.0
 2. **Look for "Debug - Show generated tags" step:**
    ```
    Generated tags:
-   hypolas/proxy-docker:1.0.0
-   hypolas/proxy-docker:1.0
-   hypolas/proxy-docker:1
-   hypolas/proxy-docker:latest
+   hypolas/dockershield:1.0.0
+   hypolas/dockershield:1.0
+   hypolas/dockershield:1
+   hypolas/dockershield:latest
    ```
 
    If empty → metadata action failed
@@ -153,7 +153,7 @@ git push origin v1.0.0
 
 ### Full Error Message
 ```
-ERROR: failed to solve: failed to do request: Head "https://registry-1.docker.io/v2/hypolas/proxy-docker/manifests/1.0.0": unauthorized: authentication required
+ERROR: failed to solve: failed to do request: Head "https://registry-1.docker.io/v2/hypolas/dockershield/manifests/1.0.0": unauthorized: authentication required
 ```
 
 ### Causes
@@ -211,7 +211,7 @@ First push creates the repository automatically. Ensure you have permissions.
 **Check:**
 - Docker Hub username: `hypolas`
 - GitHub secret DOCKERHUB_USERNAME: `hypolas`
-- Image name in workflow: `hypolas/proxy-docker`
+- Image name in workflow: `hypolas/dockershield`
 
 Must all match.
 
@@ -314,7 +314,7 @@ docker buildx build --platform linux/amd64 -t test .
 # Build for all platforms
 docker buildx build \
   --platform linux/amd64,linux/arm64,linux/arm/v7 \
-  -t hypolas/proxy-docker:test \
+  -t hypolas/dockershield:test \
   .
 ```
 
@@ -366,7 +366,7 @@ If issue persists:
 - [Docker Build Push Action](https://github.com/docker/build-push-action)
 - [Docker Metadata Action](https://github.com/docker/metadata-action)
 - [GitHub Actions Docs](https://docs.github.com/en/actions)
-- [Docker Hub](https://hub.docker.com/r/hypolas/proxy-docker)
+- [Docker Hub](https://hub.docker.com/r/hypolas/dockershield)
 
 ---
 

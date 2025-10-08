@@ -1,7 +1,7 @@
 services:
   dockershield:
     build: .
-    image: hypolas/proxy-docker:latest
+    image: hypolas/dockershield:latest
     container_name: dockershield
     ports:
       - "2375:2375"

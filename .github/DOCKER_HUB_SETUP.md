@@ -77,10 +77,10 @@ git push origin v1.0.0
 | `v1.5.0-beta` | `1.5.0-beta` (pre-release, no latest) |
 
 **Example for Git tag `v1.2.3`:**
-- ✅ `hypolas/proxy-docker:1.2.3` ← Full version (v removed)
-- ✅ `hypolas/proxy-docker:1.2` ← Major.minor
-- ✅ `hypolas/proxy-docker:1` ← Major only
-- ✅ `hypolas/proxy-docker:latest` ← If stable release
+- ✅ `hypolas/dockershield:1.2.3` ← Full version (v removed)
+- ✅ `hypolas/dockershield:1.2` ← Major.minor
+- ✅ `hypolas/dockershield:1` ← Major only
+- ✅ `hypolas/dockershield:latest` ← If stable release
 
 ## 🚀 Step 4: Verify the Workflow
 
@@ -89,16 +89,16 @@ After pushing a tag:
 1. Go to **Actions** tab: https://github.com/hypolas/dockershield/actions
 2. You should see **"Build and Publish Docker Image"** running
 3. Wait for completion (~5-10 minutes for multi-platform build)
-4. Check Docker Hub: https://hub.docker.com/r/hypolas/proxy-docker/tags
+4. Check Docker Hub: https://hub.docker.com/r/hypolas/dockershield/tags
 
 ## 🔍 Step 5: Test the Published Image
 
 ```bash
 # Pull the image
-docker pull hypolas/proxy-docker:latest
+docker pull hypolas/dockershield:latest
 
 # Or specific version
-docker pull hypolas/proxy-docker:1.0.0
+docker pull hypolas/dockershield:1.0.0
 
 # Run it
 docker run -d \
@@ -107,7 +107,7 @@ docker run -d \
   -p 2375:2375 \
   -e CONTAINERS=1 \
   -e IMAGES=1 \
-  hypolas/proxy-docker:latest
+  hypolas/dockershield:latest
 
 # Test
 export DOCKER_HOST=tcp://localhost:2375
@@ -124,7 +124,7 @@ The workflow builds for multiple architectures:
 Users can pull the appropriate image for their platform automatically:
 ```bash
 # Docker automatically selects the right architecture
-docker pull hypolas/proxy-docker:latest
+docker pull hypolas/dockershield:latest
 ```
 
 ## 📝 Workflow Features
@@ -217,8 +217,8 @@ gh run view <run-id> --log
 ```
 
 ### Docker Hub statistics:
-- **Pulls**: https://hub.docker.com/r/hypolas/proxy-docker
-- **Tags**: https://hub.docker.com/r/hypolas/proxy-docker/tags
+- **Pulls**: https://hub.docker.com/r/hypolas/dockershield
+- **Tags**: https://hub.docker.com/r/hypolas/dockershield/tags
 - **Builds**: Managed by GitHub Actions (not Docker Hub automated builds)
 
 ## 🔒 Security Best Practices

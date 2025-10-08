@@ -26,10 +26,10 @@ When you create and push a tag (e.g., `v1.0.0`), the workflow **automatically**:
 
 **Tags for `v1.2.3`:**
 ```
-hypolas/proxy-docker:1.2.3
-hypolas/proxy-docker:1.2
-hypolas/proxy-docker:1
-hypolas/proxy-docker:latest
+hypolas/dockershield:1.2.3
+hypolas/dockershield:1.2
+hypolas/dockershield:1
+hypolas/dockershield:latest
 ```
 
 ### Binary Releases (Published to GitHub Releases)
@@ -106,8 +106,8 @@ After ~10-15 minutes:
 
 **Docker Hub:**
 ```bash
-docker pull hypolas/proxy-docker:1.0.0
-docker run --rm hypolas/proxy-docker:1.0.0 --version
+docker pull hypolas/dockershield:1.0.0
+docker run --rm hypolas/dockershield:1.0.0 --version
 ```
 
 **GitHub Release:**

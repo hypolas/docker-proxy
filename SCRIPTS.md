@@ -198,7 +198,7 @@ cat docs/CONFLICT_RESOLUTION.md
 # 3. Tester en local avec docker
 docker run --rm -e LOG_LEVEL=debug \
   -e DKRPRX__VOLUMES__DENIED_PATHS=/var/log \
-  hypolas/proxy-docker:latest
+  hypolas/dockershield:latest
 ```
 
 ---

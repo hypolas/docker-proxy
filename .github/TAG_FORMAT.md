@@ -198,7 +198,7 @@ git push origin v1.0.0
 # https://github.com/hypolas/dockershield/actions
 
 # 4. Verify Docker Hub
-# https://hub.docker.com/r/hypolas/proxy-docker/tags
+# https://hub.docker.com/r/hypolas/dockershield/tags
 ```
 
 ### Deleting a Wrong Tag
