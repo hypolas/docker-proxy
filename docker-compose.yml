@@ -10,7 +10,7 @@ services:
       - /tmp:/tmp
     environment:
       # Configuration de base
-      - LISTEN_SOCKET=unix:///tmp/docker_proxy.sock
+      - LISTEN_SOCKET=unix:///tmp/dockershield.sock
       # - LISTEN_ADDR=:2375
       - DOCKER_SOCKET=unix:///var/run/docker.sock
       - LOG_LEVEL=info

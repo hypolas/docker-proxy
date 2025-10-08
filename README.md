@@ -271,11 +271,11 @@ services:
       - /tmp:/tmp  # ⚠️ IMPORTANT: must match the path in LISTEN_SOCKET
     environment:
       # Basic configuration (unix:// format recommended)
-      - LISTEN_SOCKET=unix:///tmp/docker_proxy.sock
+      - LISTEN_SOCKET=unix:///tmp/dockershield.sock
       - DOCKER_SOCKET=unix:///var/run/docker.sock
 ```
 
-> ⚠️ **Important**: The mounted volume (`/tmp:/tmp`) must match the path defined in `LISTEN_SOCKET`. If you use `LISTEN_SOCKET=unix:///tmp/docker_proxy.sock`, you must mount `/tmp:/tmp`.
+> ⚠️ **Important**: The mounted volume (`/tmp:/tmp`) must match the path defined in `LISTEN_SOCKET`. If you use `LISTEN_SOCKET=unix:///tmp/dockershield.sock`, you must mount `/tmp:/tmp`.
 
 ```mermaid
 graph LR
@@ -285,7 +285,7 @@ graph LR
 
     subgraph "Proxy Container"
         proxy[dockershield]
-        proxySock[[unix:///tmp/docker_proxy.sock]]
+        proxySock[[unix:///tmp/dockershield.sock]]
     end
 
     subgraph "Docker Host"
