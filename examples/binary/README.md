@@ -16,6 +16,8 @@ docker build -t docker-proxy:dev .   # optional image build
 ```bash
 export DOCKER_SOCKET=unix:///var/run/docker.sock
 export LISTEN_ADDR=:2375
+export LISTEN_SOCKET=unix:///tmp/dockershield.sock
+export SOCKET_PERMS=0660
 export CONTAINERS=1
 export IMAGES=1
 export POST=0
@@ -35,6 +37,10 @@ The binary now listens on `tcp://0.0.0.0:2375`. Point your Docker CLI to the pro
 ```bash
 export DOCKER_HOST=tcp://127.0.0.1:2375
 docker version
+
+# using the Unix socket (requires sharing /tmp or pointing to the socket path)
+export DOCKER_HOST=unix:///tmp/dockershield.sock
+docker ps
 ```
 
 Press `Ctrl+C` to stop the proxy.

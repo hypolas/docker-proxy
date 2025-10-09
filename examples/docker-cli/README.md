@@ -1,6 +1,6 @@
 # Example: Use docker-proxy with a remote Docker CLI
 
-This example assumes you already launched `docker-proxy` (for example with the Compose stack or in another host) and it listens on `tcp://proxy-host:2375`.
+This example assumes you already launched `docker-proxy` (for example with the Compose stack or in another host) and it listens on `tcp://proxy-host:2375` and/or exposes a Unix socket.
 
 ## One-off commands
 
@@ -8,12 +8,16 @@ This example assumes you already launched `docker-proxy` (for example with the C
 export DOCKER_HOST=tcp://proxy-host:2375
 export DOCKER_TLS_VERIFY=0        # remove if you enable TLS
 
-# read-only operations use GET/HEAD and should succeed
+# read-only operations via TCP should succeed
 docker ps
 docker images
 
 # write operations (POST/DELETE) will be filtered depending on proxy config
 docker run --rm alpine:3.19 echo "hello"
+
+# switch to a Unix socket exposed on a shared volume
+export DOCKER_HOST=unix:///tmp/dockershield.sock
+docker ps
 ```
 
 ## Switching between proxy and local dockerd
