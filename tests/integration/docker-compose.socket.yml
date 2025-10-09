@@ -1,0 +1,53 @@
+
+services:
+  docker-proxy:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    environment:
+      DOCKER_SOCKET: unix:///var/run/docker.sock
+      LISTEN_SOCKET: unix:///tmp/docker-proxy.sock
+      SOCKET_PERMS: "0666"
+      LOG_LEVEL: debug
+      CONTAINERS: ${TEST_CONTAINERS:-0}
+      IMAGES: ${TEST_IMAGES:-0}
+      VOLUMES: ${TEST_VOLUMES:-0}
+      NETWORKS: ${TEST_NETWORKS:-0}
+      POST: ${TEST_POST:-0}
+      DELETE: ${TEST_DELETE:-0}
+      PUT: ${TEST_PUT:-0}
+      DKRPRX__VOLUMES__DENIED_PATHS: ${TEST_DENIED_PATHS:-}
+      DKRPRX__VOLUMES__ALLOWED_PATHS: ${TEST_ALLOWED_PATHS:-}
+      DKRPRX__CONTAINERS__DENIED_IMAGES: ${TEST_DENIED_IMAGES:-}
+      DKRPRX__CONTAINERS__ALLOWED_IMAGES: ${TEST_ALLOWED_IMAGES:-}
+      DKRPRX__DISABLE_DEFAULTS: ${TEST_DISABLE_DEFAULTS:-false}
+    networks:
+      - test-network
+    volumes:
+      - /tmp:/tmp
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  test-client:
+    image: docker:26-cli
+    depends_on:
+      - docker-proxy
+    environment:
+      DOCKER_HOST: unix:///tmp/docker-proxy.sock
+    networks:
+      - test-network
+    volumes:
+      - /tmp:/tmp
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        apk add --no-cache bash
+        sleep infinity
+
+networks:
+  test-network:
+    driver: bridge
+
+volumes:
+  docker-data:
+  shared-tmp:
