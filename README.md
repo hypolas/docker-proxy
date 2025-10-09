@@ -600,6 +600,7 @@ export DKRPRX__VOLUMES__DENIED_PATHS="^/(etc|root|home|sys|proc)/.*"
 - **[ADVANCED_FILTERS.md](ADVANCED_FILTERS.md)** - Complete guide to advanced filters with detailed examples
 - **[ENV_FILTERS.md](ENV_FILTERS.md)** - Configuration via environment variables
 - **[SECURITY.md](SECURITY.md)** - Security guide and blocked attack vectors
+- **[Examples](examples/README.md)** - Ready-to-use snippets for Docker Compose, CLI, and the standalone binary
 
 **The filtering system allows as precise control as needed for your environment!**
 
@@ -652,9 +653,36 @@ export DKRPRX__VOLUMES__ALLOWED_PATHS="^/var/run/docker\\.sock$"
 
 ## 🧪 Tests
 
-To test the proxy:
+### Integration Tests (Recommended)
 
-### TCP mode (default)
+Comprehensive test suite with 19 tests across 5 scenarios:
+
+```bash
+cd tests/integration
+chmod +x run-tests.sh
+
+# Run all scenarios (~2 minutes)
+./run-tests.sh all
+
+# Or specific scenarios
+./run-tests.sh readonly    # Read-only mode tests
+./run-tests.sh volumes     # Volume filter tests with regex
+./run-tests.sh images      # Image filter tests with regex
+./run-tests.sh security    # Default security tests
+```
+
+**What's tested:**
+- ✅ ACL rules (CONTAINERS, IMAGES, POST, DELETE, etc.)
+- ✅ Advanced filters with regex patterns
+- ✅ Volume path filtering
+- ✅ Image/container name filtering
+- ✅ Default security (socket blocking, name protection)
+
+See [tests/integration/README.md](tests/integration/README.md) for details.
+
+### Manual Testing
+
+#### TCP mode (default)
 
 ```bash
 # Start proxy with containers in read-only
@@ -668,7 +696,7 @@ curl http://localhost:2375/v1.41/containers/json
 curl http://localhost:2375/v1.41/images/json  # 403 Forbidden
 ```
 
-### Unix socket mode
+#### Unix socket mode
 
 ```bash
 # Start proxy on Unix socket
