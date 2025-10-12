@@ -33,28 +33,40 @@ func AdvancedFilterMiddleware(filter *filters.AdvancedFilter, logger *logrus.Log
 			return
 		}
 
-		// Déterminer le type d'opération
+		// Déterminer le type d'opération et marquer si le filtre avancé a autorisé
+		handled := false
 		if matched, _ := regexp.MatchString(`/containers/create`, path); matched {
+			handled = true
 			if !checkContainerCreate(c, filter, logger) {
 				return
 			}
 		} else if matched, _ := regexp.MatchString(`/volumes/create`, path); matched {
+			handled = true
 			if !checkVolumeCreate(c, filter, logger) {
 				return
 			}
 		} else if matched, _ := regexp.MatchString(`/networks/create`, path); matched {
+			handled = true
 			if !checkNetworkCreate(c, filter, logger) {
 				return
 			}
 		} else if matched, _ := regexp.MatchString(`/images/create`, path); matched {
+			handled = true
 			if !checkImageCreate(c, filter, logger) {
 				return
 			}
 		} else if matched, _ := regexp.MatchString(`/build`, path); matched {
+			handled = true
 			// Vérifier le tag de l'image dans les query params
 			if !checkImageBuild(c, filter, logger) {
 				return
 			}
+		}
+
+		// Si le filtre avancé a traité et autorisé la requête, marquer dans le contexte
+		// pour que l'ACL sache qu'elle doit être autorisée même si IMAGES=0, CONTAINERS=0, etc.
+		if handled {
+			c.Set("advanced_filter_authorized", true)
 		}
 
 		c.Next()

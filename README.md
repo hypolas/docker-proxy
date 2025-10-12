@@ -50,6 +50,7 @@ Ideal for **cloud-native security**, **Kubernetes**, **Docker Swarm**, **PaaS**,
 ### 🎯 Granular Access Control
 - **ACL per endpoint**: Enable only necessary Docker endpoints
 - **Advanced filters with regex**: Precise control over volumes, containers, images, networks
+- **🆕 Filter priority**: Advanced filters (`DKRPRX__*`) can **override ACL restrictions**
 - **Content filtering**: Inspect and validate requests before forwarding
 - **Flexible configuration**: JSON or environment variables (priority)
 
@@ -76,6 +77,22 @@ export DKRPRX__CONTAINERS__DENY_PRIVILEGED="true"
 # Require specific labels
 export DKRPRX__CONTAINERS__REQUIRE_LABELS="env=production,team=backend"
 ```
+
+### 🆕 NEW: Advanced Filters Override ACL
+
+**Advanced filters now have priority over basic ACL rules!** This allows fine-grained control:
+
+```bash
+# Example: Allow ONLY private registry pulls, even with IMAGES=0
+export IMAGES=0  # Disable all image operations by default
+export DKRPRX__IMAGES__ALLOWED_REPOS="^registry\.company\.com/.*"
+
+# Result:
+# ❌ docker pull nginx              → Blocked (public registry)
+# ✅ docker pull registry.company.com/nginx → Allowed (matches filter)
+```
+
+**See [docs/ADVANCED_FILTERS.md](docs/ADVANCED_FILTERS.md) for complete guide.**
 
 ## ⚠️ Disclaimer
 

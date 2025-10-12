@@ -48,8 +48,9 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Recovery())
 	router.Use(middleware.LoggingMiddleware(logger))
-	router.Use(middleware.ACLMiddleware(matcher))
+	// Advanced filters run FIRST to allow DKRPRX__ variables to override ACL
 	router.Use(middleware.AdvancedFilterMiddleware(cfg.AdvancedFilters, logger))
+	router.Use(middleware.ACLMiddleware(matcher))
 
 	// Register catch-all route for proxying
 	router.Any("/*path", proxyHandler.ProxyRequest)

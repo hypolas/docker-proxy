@@ -9,6 +9,7 @@ import (
 	"dockershield/pkg/rules"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestACLMiddleware(t *testing.T) {
@@ -333,6 +334,69 @@ func TestACLMiddlewareMultipleEndpoints(t *testing.T) {
 			t.Errorf("For path %s: expected status %d, got %d", tt.path, tt.expectedStatus, w.Code)
 		}
 	}
+}
+
+// TestACLMiddlewareWithAdvancedFilterOverride tests that advanced filters can override ACL
+func TestACLMiddlewareWithAdvancedFilterOverride(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	// Create rules with IMAGES=0 (disabled)
+	accessRules := &config.AccessRules{
+		Images: false,
+		Post:   true,
+	}
+	matcher := rules.NewMatcher(accessRules)
+
+	// Test 1: Without advanced filter authorization - should be blocked
+	t.Run("Without advanced filter - blocked by ACL", func(t *testing.T) {
+		router := gin.New()
+		router.Use(ACLMiddleware(matcher))
+		router.POST("/*path", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{"message": "success"})
+		})
+
+		req := httptest.NewRequest("POST", "/v1.41/images/create", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusForbidden, w.Code, "Should be blocked by ACL when IMAGES=0")
+	})
+
+	// Test 2: With advanced filter authorization - should be allowed
+	t.Run("With advanced filter - ACL bypassed", func(t *testing.T) {
+		router := gin.New()
+		// Simulate advanced filter marking the request as authorized
+		router.Use(func(c *gin.Context) {
+			c.Set("advanced_filter_authorized", true)
+			c.Next()
+		})
+		router.Use(ACLMiddleware(matcher))
+		router.POST("/*path", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{"message": "success"})
+		})
+
+		req := httptest.NewRequest("POST", "/v1.41/images/create", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code, "Should bypass ACL when advanced filter authorized")
+	})
+
+	// Test 3: Advanced filter authorization doesn't affect other endpoints
+	t.Run("Advanced filter only affects marked requests", func(t *testing.T) {
+		router := gin.New()
+		router.Use(ACLMiddleware(matcher))
+		router.GET("/*path", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{"message": "success"})
+		})
+
+		// Try accessing disabled endpoint (IMAGES=0)
+		req := httptest.NewRequest("GET", "/v1.41/images/json", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusForbidden, w.Code, "GET requests without advanced filter should still be blocked")
+	})
 }
 
 // Helper function to check if a string contains a substring
